@@ -52,6 +52,15 @@
   .stat-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;}
   .stat-card .label{font-size:12px;color:#64748b;margin-bottom:6px;}
   .stat-card .value{font-size:26px;font-weight:700;color:var(--primary);}
+  .stat-card .sub{font-size:12px;color:#64748b;margin-top:4px;}
+
+  /* ---------- Bảng xếp hạng người dẫn dắt ---------- */
+  .rank-row{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:#fff;}
+  .rank-row:first-child{border-color:#fbbf24;background:#fffbeb;}
+  .rank-medal{font-size:22px;width:30px;text-align:center;flex-shrink:0;}
+  .rank-name{flex:1;font-weight:600;color:#1e293b;}
+  .rank-count{color:var(--primary);font-weight:700;white-space:nowrap;}
+  .rank-empty{color:#94a3b8;font-size:14px;padding:8px 0;}
 
   /* ---------- Khu vực pill tabs ---------- */
   .kv-pills{display:flex;gap:6px;flex-wrap:wrap;}
@@ -79,7 +88,7 @@
   <div id="sidebar">
     <h2>📋 Học viên</h2>
     <button type="button" class="nav-btn active" data-panel="stats" onclick="showPanel('stats')"><span class="nav-icon">📊</span> Tổng quan</button>
-    <button type="button" class="nav-btn" data-panel="add" onclick="showPanel('add')"><span class="nav-icon">📝</span> Nhập học viên</button>
+    <button type="button" class="nav-btn" data-panel="add" onclick="showPanel('add')"><span class="nav-icon">📝</span> Nhập học viên và Đơn thuần</button>
     <button type="button" class="nav-btn" data-panel="goal" onclick="showPanel('goal')"><span class="nav-icon">🎯</span> Nhập mục tiêu</button>
     <button type="button" class="nav-btn" data-panel="kv" onclick="showPanel('kv')"><span class="nav-icon">🗺️</span> Hiện trạng khu vực</button>
   </div>
@@ -93,11 +102,24 @@
 
       <div class="card">
         <h3>Mục tiêu tổng (tháng <span id="ov_monthLabel"></span>) — cộng dồn tất cả Khu vực</h3>
-        <table>
-          <thead><tr><th></th><th>Mục tiêu</th><th>Thực tế</th><th>% hoàn thành</th></tr></thead>
-          <tbody id="overallGoalBody"></tbody>
-        </table>
-        <p style="font-size:12px;color:#64748b;margin-top:8px;">Tự cộng dồn ngay khi các Khu vực nhập mục tiêu (Đơn thuần/Hữu hiệu/BT) ở tab "Nhập mục tiêu". Vào "Hiện trạng khu vực" để xem riêng từng khu vực.</p>
+        <div class="stat-cards" style="margin-bottom:0;">
+          <div class="stat-card">
+            <div class="label">Đơn thuần</div>
+            <div class="value" id="ovg_donthuan">—</div>
+            <div class="sub" id="ovg_donthuan_sub"></div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Hữu hiệu</div>
+            <div class="value" id="ovg_huuhieu">—</div>
+            <div class="sub" id="ovg_huuhieu_sub"></div>
+          </div>
+          <div class="stat-card">
+            <div class="label">BT</div>
+            <div class="value" id="ovg_bt">—</div>
+            <div class="sub" id="ovg_bt_sub"></div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:#64748b;margin-top:10px;">Tự cộng dồn ngay khi các Khu vực nhập mục tiêu (Đơn thuần/Hữu hiệu/BT) ở tab "Nhập mục tiêu". Vào "Hiện trạng khu vực" để xem riêng từng khu vực.</p>
       </div>
 
       <div class="card">
@@ -122,11 +144,17 @@
           </table>
         </div>
       </div>
+
+      <div class="card">
+        <h3>🏆 Xếp hạng Anh/Chị dẫn dắt nhiều học viên đang nghe nhất (tháng <span id="ov_rankMonthLabel"></span>)</h3>
+        <div id="topNguoiDanDat"></div>
+        <p style="font-size:12px;color:#64748b;margin-top:10px;">Xếp hạng theo số học viên "Đang nghe" (Tiến độ B1–BT, không tính Tạm nghỉ) có "Ngày chia sẻ cuối cùng" trong tháng này, nhóm theo "Người dẫn dắt".</p>
+      </div>
     </div>
 
     <!-- ============ NHẬP HỌC VIÊN ============ -->
     <div id="panel-add" class="panel">
-      <h1>Nhập học viên</h1>
+      <h1>Nhập học viên và Đơn thuần</h1>
 
       <div class="card">
         <h3 id="formTitle">Thêm học viên mới</h3>
@@ -136,7 +164,9 @@
             <div><label>Tên học viên *</label><input id="f_ten" required></div>
             <div><label>Ngày chia sẻ cuối cùng</label><input id="f_ngay" type="date"></div>
             <div><label>Địa chỉ</label><input id="f_diachi"></div>
-            <div><label>Người dẫn dắt</label><input id="f_nguoidandat"></div>
+            <div><label>Người dẫn dắt 1</label><input id="f_ndd1"></div>
+            <div><label>Người dẫn dắt 2</label><input id="f_ndd2"></div>
+            <div><label>Người dẫn dắt 3</label><input id="f_ndd3"></div>
             <div><label>Khu vực</label><select id="f_to"></select></div>
             <div><label>Tiến độ</label><select id="f_tiendo"></select></div>
             <div style="grid-column:1/-1"><label>Đánh giá hv (theo ngày học gần nhất)</label><textarea id="f_danhgia"></textarea></div>
@@ -171,45 +201,10 @@
         <p style="font-size:12px;color:#64748b;margin:6px 0 0;">Lọc theo thời gian áp dụng trên cột "Ngày chia sẻ cuối cùng" ("Hôm nay"/"1 tuần qua"/"1 tháng qua" tính lùi từ ngày hiện tại).</p>
         <div style="overflow-x:auto">
         <table>
-          <thead><tr><th>STT</th><th>Tên</th><th>Ngày chia sẻ</th><th>Địa chỉ</th><th>Người dẫn dắt</th><th>Khu vực</th><th>Tiến độ</th><th>Đánh giá</th><th>Thao tác</th></tr></thead>
+          <thead><tr><th>STT</th><th>Tên</th><th>Ngày chia sẻ</th><th>Địa chỉ</th><th>NDD 1</th><th>NDD 2</th><th>NDD 3</th><th>Khu vực</th><th>Tiến độ</th><th>Đánh giá</th><th>Thao tác</th></tr></thead>
           <tbody id="studentsBody"></tbody>
         </table>
         </div>
-      </div>
-    </div>
-
-    <!-- ============ NHẬP MỤC TIÊU ============ -->
-    <div id="panel-goal" class="panel">
-      <h1>Nhập mục tiêu</h1>
-      <p style="font-size:12px;color:#64748b;margin-top:-8px;">Mục tiêu luôn áp dụng cho tháng hiện tại (<b id="goalCurMonthLabel"></b>).</p>
-
-      <div class="card">
-        <h3 id="goalFormTitle">Nhập mục tiêu Khu vực</h3>
-        <form id="goalKVForm">
-          <div class="grid">
-            <div><label>Khu vực *</label><select id="gkv_to" required></select></div>
-            <div><label>Mục tiêu Đơn thuần</label><input type="number" id="gkv_donthuan" min="0" value="0"></div>
-            <div><label>Mục tiêu Hữu hiệu</label><input type="number" id="gkv_huuhieu" min="0" value="0"></div>
-            <div><label>Mục tiêu BT (Báp-têm)</label><input type="number" id="gkv_bt" min="0" value="0"></div>
-          </div>
-          <div style="margin-top:10px;">
-            <button type="submit">Lưu mục tiêu</button>
-          </div>
-        </form>
-
-        <div style="overflow-x:auto;margin-top:16px;">
-        <table>
-          <thead>
-            <tr><th rowspan="2">Khu vực</th><th colspan="3">Đơn thuần</th><th colspan="3">Hữu hiệu</th><th colspan="3">BT</th><th rowspan="2">Thao tác</th></tr>
-            <tr><th>MT</th><th>TT</th><th>%</th><th>MT</th><th>TT</th><th>%</th><th>MT</th><th>TT</th><th>%</th></tr>
-          </thead>
-          <tbody id="goalKVListBody"></tbody>
-        </table>
-        </div>
-        <p style="font-size:12px;color:#64748b;margin-top:8px;">
-          MT = Mục tiêu · TT = Thực tế (tự tính từ Nhập học viên + nhật ký Đơn thuần bên dưới) · % = TT ÷ MT.
-          Bấm ✏️ để nạp lại vào form phía trên sửa, 🗑️ để đưa mục tiêu Khu vực đó về 0.
-        </p>
       </div>
 
       <div class="card">
@@ -233,6 +228,50 @@
           </table>
         </div>
         <p style="font-size:12px;color:#64748b;margin-top:8px;">Chỉ hiện các dòng của tháng hiện tại (<b id="goalCurMonthLabel2"></b>).</p>
+      </div>
+    </div>
+
+    <!-- ============ NHẬP MỤC TIÊU ============ -->
+    <div id="panel-goal" class="panel">
+      <h1>Nhập mục tiêu</h1>
+
+      <div class="card">
+        <div class="toolbar">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <label style="margin:0;font-weight:400;">Xem/Nhập mục tiêu tháng:</label>
+            <input type="month" id="goalMonth">
+          </div>
+        </div>
+        <p id="goalPastNotice" style="font-size:12px;color:#dc2626;margin:10px 0 0;display:none;">⚠️ Đang xem tháng đã qua — chỉ xem được, không thể thêm/sửa/xóa mục tiêu của tháng cũ.</p>
+      </div>
+
+      <div class="card">
+        <h3 id="goalFormTitle">Nhập mục tiêu Khu vực</h3>
+        <form id="goalKVForm">
+          <div class="grid">
+            <div><label>Khu vực *</label><select id="gkv_to" required></select></div>
+            <div><label>Mục tiêu Đơn thuần</label><input type="number" id="gkv_donthuan" min="0" value="0"></div>
+            <div><label>Mục tiêu Hữu hiệu</label><input type="number" id="gkv_huuhieu" min="0" value="0"></div>
+            <div><label>Mục tiêu BT (Báp-têm)</label><input type="number" id="gkv_bt" min="0" value="0"></div>
+          </div>
+          <div style="margin-top:10px;">
+            <button type="submit" id="gkvSubmitBtn">Lưu mục tiêu</button>
+          </div>
+        </form>
+
+        <div style="overflow-x:auto;margin-top:16px;">
+        <table>
+          <thead>
+            <tr><th rowspan="2">Khu vực</th><th colspan="3">Đơn thuần</th><th colspan="3">Hữu hiệu</th><th colspan="3">BT</th><th rowspan="2">Thao tác</th></tr>
+            <tr><th>MT</th><th>TT</th><th>%</th><th>MT</th><th>TT</th><th>%</th><th>MT</th><th>TT</th><th>%</th></tr>
+          </thead>
+          <tbody id="goalKVListBody"></tbody>
+        </table>
+        </div>
+        <p style="font-size:12px;color:#64748b;margin-top:8px;">
+          MT = Mục tiêu · TT = Thực tế (tự tính từ Nhập học viên + nhật ký Đơn thuần ở tab "Nhập học viên và Đơn thuần") · % = TT ÷ MT.
+          Bấm ✏️ để nạp lại vào form phía trên sửa, 🗑️ để đưa mục tiêu Khu vực đó về 0.
+        </p>
       </div>
     </div>
 
@@ -284,7 +323,7 @@
  * ========================================================= */
 const API_BASE = 'https://script.google.com/macros/s/AKfycbxDU7SXsnAkdRfAi8EXkknxwKHqCba1G4lIqs5H572do6mbkNkstvJVdDpsiL9LkBg/exec';
 const API_READ_FNS = new Set(['getDropdownOptions', 'getStudents', 'getStats', 'getProgressBreakdown',
-  'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getDonThuanLogs']);
+  'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getDonThuanLogs', 'getTopNguoiDanDat']);
 
 function createRunner(){
   let onSuccess = null;
@@ -398,7 +437,8 @@ function renderStudents(list){
   body.innerHTML = list.map(function(s){
     return '<tr>' +
       '<td>' + esc(s.stt) + '</td><td>' + esc(s.ten) + '</td><td>' + esc(s.ngay) + '</td><td>' + esc(s.diaChi) + '</td>' +
-      '<td>' + esc(s.nguoiDanDat) + '</td><td>' + esc(s.to) + '</td><td>' + esc(s.tienDo) + '</td><td>' + esc(s.danhGia) + '</td>' +
+      '<td>' + esc(s.ndd1) + '</td><td>' + esc(s.ndd2) + '</td><td>' + esc(s.ndd3) + '</td>' +
+      '<td>' + esc(s.to) + '</td><td>' + esc(s.tienDo) + '</td><td>' + esc(s.danhGia) + '</td>' +
       '<td class="actions">' +
         '<button class="edit" onclick="editStudent(' + s.row + ')">Sửa</button>' +
         '<button class="danger" onclick="removeStudent(' + s.row + ')">Xóa</button>' +
@@ -477,7 +517,9 @@ function editStudent(row){
   document.getElementById('editRow').value = row;
   document.getElementById('f_ten').value = s.ten || '';
   document.getElementById('f_diachi').value = s.diaChi || '';
-  document.getElementById('f_nguoidandat').value = s.nguoiDanDat || '';
+  document.getElementById('f_ndd1').value = s.ndd1 || '';
+  document.getElementById('f_ndd2').value = s.ndd2 || '';
+  document.getElementById('f_ndd3').value = s.ndd3 || '';
   document.getElementById('f_to').value = s.to || '';
   document.getElementById('f_tiendo').value = s.tienDo || '';
   document.getElementById('f_danhgia').value = s.danhGia || '';
@@ -502,7 +544,9 @@ document.getElementById('studentForm').addEventListener('submit', function(e){
     ten: document.getElementById('f_ten').value,
     ngay: document.getElementById('f_ngay').value,
     diaChi: document.getElementById('f_diachi').value,
-    nguoiDanDat: document.getElementById('f_nguoidandat').value,
+    ndd1: document.getElementById('f_ndd1').value,
+    ndd2: document.getElementById('f_ndd2').value,
+    ndd3: document.getElementById('f_ndd3').value,
     to: document.getElementById('f_to').value,
     tienDo: document.getElementById('f_tiendo').value,
     danhGia: document.getElementById('f_danhgia').value
@@ -545,11 +589,21 @@ function renderGoalRows(s){
     '<tr><td>BT</td><td>' + esc(s.goal.bt) + '</td><td>' + esc(s.actual.bt) + '</td><td>' + pctText(s.percent.bt) + '</td></tr>';
 }
 
+function renderOverallGoalCards(s){
+  function fill(key, goal, actual, percent){
+    document.getElementById('ovg_' + key).textContent = pctText(percent);
+    document.getElementById('ovg_' + key + '_sub').textContent = 'Thực tế ' + actual + ' / Mục tiêu ' + goal;
+  }
+  fill('donthuan', s.goal.donThuan, s.actual.donThuan, s.percent.donThuan);
+  fill('huuhieu', s.goal.huuHieu, s.actual.huuHieu, s.percent.huuHieu);
+  fill('bt', s.goal.bt, s.actual.bt, s.percent.bt);
+}
+
 function loadOverallGoal(){
   const monthKey = currentMonthKey();
   document.getElementById('ov_monthLabel').textContent = monthKey;
   google.script.run.withSuccessHandler(function(s){
-    document.getElementById('overallGoalBody').innerHTML = renderGoalRows(s);
+    renderOverallGoalCards(s);
     document.getElementById('ov_donthuan').textContent = pctText(s.percent.donThuan);
     document.getElementById('ov_huuhieu').textContent = pctText(s.percent.huuHieu);
     document.getElementById('ov_bt').textContent = pctText(s.percent.bt);
@@ -560,6 +614,34 @@ function loadOverallGoal(){
 
 function loadStatsPanel(){
   loadOverallGoal();
+  loadTopNguoiDanDat();
+}
+
+function renderTopNguoiDanDat(list){
+  const el = document.getElementById('topNguoiDanDat');
+  const top3 = (list || []).slice(0, 3);
+  if (!top3.length) {
+    el.innerHTML = '<div class="rank-empty">Chưa có học viên "Đang nghe" nào trong tháng này.</div>';
+    return;
+  }
+  const medals = ['🥇', '🥈', '🥉'];
+  el.innerHTML = top3.map(function(item, i){
+    return '<div class="rank-row">' +
+      '<span class="rank-medal">' + medals[i] + '</span>' +
+      '<span class="rank-name">' + esc(item.nguoiDanDat) + '</span>' +
+      '<span class="rank-count">' + esc(item.count) + ' học viên</span>' +
+      '</div>';
+  }).join('');
+}
+
+function loadTopNguoiDanDat(){
+  const monthKey = currentMonthKey();
+  document.getElementById('ov_rankMonthLabel').textContent = monthKey;
+  google.script.run.withSuccessHandler(function(list){
+    renderTopNguoiDanDat(list);
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi tải xếp hạng người dẫn dắt: ' + err.message, false);
+  }).getTopNguoiDanDat(monthKey);
 }
 
 // Bảng "ai đang nghe, nghe đến đâu" — bấm vào thẻ "Đang nghe" để bật/tắt.
@@ -582,19 +664,42 @@ document.getElementById('ov_dangnghe_card').addEventListener('click', function()
 });
 
 /** ---------- NHẬP MỤC TIÊU ---------- */
+// Tháng đang xem/sửa mục tiêu (lấy từ ô #goalMonth, mặc định tháng hiện tại).
+function goalMonthKey(){
+  return document.getElementById('goalMonth').value || currentMonthKey();
+}
+
+// So sánh dạng chuỗi "yyyy-MM" vẫn đúng thứ tự thời gian (zero-padded).
+function isPastGoalMonth(monthKey){
+  return monthKey < currentMonthKey();
+}
+
+// Khóa/mở form nhập mục tiêu + nút Sửa/Xóa tùy theo tháng đang xem là quá khứ
+// hay hiện tại/tương lai — tháng đã qua chỉ xem, không cho sửa.
+function updateGoalMonthUI(){
+  const past = isPastGoalMonth(goalMonthKey());
+  document.getElementById('goalPastNotice').style.display = past ? 'block' : 'none';
+  ['gkv_to', 'gkv_donthuan', 'gkv_huuhieu', 'gkv_bt', 'gkvSubmitBtn'].forEach(function(id){
+    document.getElementById(id).disabled = past;
+  });
+  return past;
+}
+
 function loadGoalKVList(){
-  const monthKey = currentMonthKey();
+  const monthKey = goalMonthKey();
+  const past = updateGoalMonthUI();
   google.script.run.withSuccessHandler(function(list){
     document.getElementById('goalKVListBody').innerHTML = list.map(function(s){
+      const actions = past
+        ? '<span style="color:#94a3b8;">— (tháng đã qua)</span>'
+        : '<button class="icon-btn" title="Sửa" onclick="editGoalKV(\'' + s.khuVuc + '\',' + s.goal.donThuan + ',' + s.goal.huuHieu + ',' + s.goal.bt + ')">✏️</button>' +
+          '<button class="icon-btn" title="Xóa (đưa về 0)" onclick="deleteGoalKV(\'' + s.khuVuc + '\')">🗑️</button>';
       return '<tr>' +
         '<td>' + esc(s.khuVuc) + '</td>' +
         '<td>' + esc(s.goal.donThuan) + '</td><td>' + esc(s.actual.donThuan) + '</td><td>' + pctText(s.percent.donThuan) + '</td>' +
         '<td>' + esc(s.goal.huuHieu) + '</td><td>' + esc(s.actual.huuHieu) + '</td><td>' + pctText(s.percent.huuHieu) + '</td>' +
         '<td>' + esc(s.goal.bt) + '</td><td>' + esc(s.actual.bt) + '</td><td>' + pctText(s.percent.bt) + '</td>' +
-        '<td class="actions">' +
-          '<button class="icon-btn" title="Sửa" onclick="editGoalKV(\'' + s.khuVuc + '\',' + s.goal.donThuan + ',' + s.goal.huuHieu + ',' + s.goal.bt + ')">✏️</button>' +
-          '<button class="icon-btn" title="Xóa (đưa về 0)" onclick="deleteGoalKV(\'' + s.khuVuc + '\')">🗑️</button>' +
-        '</td>' +
+        '<td class="actions">' + actions + '</td>' +
       '</tr>';
     }).join('');
   }).withFailureHandler(function(err){
@@ -602,29 +707,43 @@ function loadGoalKVList(){
   }).getMonthlySummaryByKV(monthKey);
 }
 
+document.getElementById('goalMonth').addEventListener('change', function(){
+  resetGoalForm();
+  loadGoalKVList();
+});
+
+function resetGoalForm(){
+  document.getElementById('goalKVForm').reset();
+  document.getElementById('goalFormTitle').textContent = 'Nhập mục tiêu Khu vực (' + goalMonthKey() + ')';
+}
+
 function editGoalKV(khuVuc, donThuan, huuHieu, bt){
+  if (isPastGoalMonth(goalMonthKey())) return;
   showPanel('goal');
   document.getElementById('gkv_to').value = khuVuc;
   document.getElementById('gkv_donthuan').value = donThuan;
   document.getElementById('gkv_huuhieu').value = huuHieu;
   document.getElementById('gkv_bt').value = bt;
-  document.getElementById('goalFormTitle').textContent = 'Sửa mục tiêu: ' + khuVuc;
+  document.getElementById('goalFormTitle').textContent = 'Sửa mục tiêu: ' + khuVuc + ' (' + goalMonthKey() + ')';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function deleteGoalKV(khuVuc){
-  if (!confirm('Đưa mục tiêu của "' + khuVuc + '" về 0?')) return;
+  if (isPastGoalMonth(goalMonthKey())) return;
+  if (!confirm('Đưa mục tiêu của "' + khuVuc + '" (tháng ' + goalMonthKey() + ') về 0?')) return;
   google.script.run.withSuccessHandler(function(){
     showMsg('Đã xóa mục tiêu', true);
     loadGoalKVList();
     loadOverallGoal();
   }).withFailureHandler(function(err){
     showMsg('Lỗi: ' + err.message, false);
-  }).deleteGoalKV(khuVuc);
+  }).deleteGoalKV(goalMonthKey(), khuVuc);
 }
 
 document.getElementById('goalKVForm').addEventListener('submit', function(e){
   e.preventDefault();
+  const monthKey = goalMonthKey();
+  if (isPastGoalMonth(monthKey)) { showMsg('Không thể sửa mục tiêu của tháng đã qua', false); return; }
   const khuVuc = document.getElementById('gkv_to').value;
   if (!khuVuc) { showMsg('Vui lòng chọn Khu vực', false); return; }
   const data = {
@@ -634,13 +753,12 @@ document.getElementById('goalKVForm').addEventListener('submit', function(e){
   };
   google.script.run.withSuccessHandler(function(){
     showMsg('Đã lưu mục tiêu', true);
-    document.getElementById('goalKVForm').reset();
-    document.getElementById('goalFormTitle').textContent = 'Nhập mục tiêu Khu vực';
+    resetGoalForm();
     loadOverallGoal();
     loadGoalKVList();
   }).withFailureHandler(function(err){
     showMsg('Lỗi: ' + err.message, false);
-  }).saveGoalKV(khuVuc, data);
+  }).saveGoalKV(monthKey, khuVuc, data);
 });
 
 function loadLogs(){
@@ -689,7 +807,8 @@ function removeLog(row){
 
 function loadGoalPanel(){
   const mk = currentMonthKey();
-  document.getElementById('goalCurMonthLabel').textContent = mk;
+  if (!document.getElementById('goalMonth').value) document.getElementById('goalMonth').value = mk;
+  document.getElementById('goalFormTitle').textContent = 'Nhập mục tiêu Khu vực (' + goalMonthKey() + ')';
   document.getElementById('goalCurMonthLabel2').textContent = mk;
   loadGoalKVList();
   loadLogs();
