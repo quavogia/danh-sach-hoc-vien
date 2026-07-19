@@ -8,7 +8,7 @@
   :root{--primary:#2563eb;--bg:#f8fafc;--border:#e2e8f0;--text:#1e293b;--sidebar:#0f172a;--sidebar-hover:#1e293b;}
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
-  body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:15px;}
 
   /* ---------- Sidebar ---------- */
   #sidebar{width:220px;flex-shrink:0;background:var(--sidebar);color:#fff;padding:18px 12px;}
@@ -19,25 +19,25 @@
   .nav-icon{font-size:16px;}
 
   /* ---------- Main content ---------- */
-  #main{flex:1;padding:22px;overflow-y:auto;}
+  #main{flex:1;padding:32px 40px;overflow-y:auto;}
   .panel{display:none;}
   .panel.active{display:block;}
-  h1{font-size:20px;margin:0 0 16px;}
-  h3{margin:0 0 12px;font-size:15px;}
-  .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
-  label{font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:4px;}
-  input,select,textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;}
+  h1{font-size:28px;margin:0 0 22px;}
+  h3{margin:0 0 16px;font-size:19px;}
+  .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin-bottom:26px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+  label{font-size:13px;font-weight:600;color:#475569;display:block;margin-bottom:5px;}
+  input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;font-family:inherit;}
   textarea{grid-column:1/-1;min-height:60px;resize:vertical;}
-  button{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:6px;font-size:14px;cursor:pointer;}
+  button{background:var(--primary);color:#fff;border:none;padding:10px 20px;border-radius:6px;font-size:15px;cursor:pointer;}
   button:disabled{opacity:.6;cursor:not-allowed;}
   button.secondary{background:#64748b;}
-  button.danger{background:#dc2626;padding:5px 10px;font-size:12px;}
-  button.edit{background:#059669;padding:5px 10px;font-size:12px;margin-right:4px;}
-  button.icon-btn{background:transparent;padding:4px 8px;font-size:15px;border:1px solid var(--border);border-radius:6px;margin-right:4px;}
+  button.danger{background:#dc2626;padding:6px 12px;font-size:13px;}
+  button.edit{background:#059669;padding:6px 12px;font-size:13px;margin-right:4px;}
+  button.icon-btn{background:transparent;padding:5px 9px;font-size:16px;border:1px solid var(--border);border-radius:6px;margin-right:4px;}
   button.icon-btn:hover{background:#f1f5f9;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  th,td{border:1px solid var(--border);padding:6px 8px;text-align:left;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;}
   th{background:#f1f5f9;}
   .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;justify-content:space-between;}
   .stats-num{font-weight:700;}
@@ -48,11 +48,11 @@
   .stat-input{width:60px;padding:4px;}
 
   /* ---------- Stat cards ---------- */
-  .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
-  .stat-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;}
-  .stat-card .label{font-size:12px;color:#64748b;margin-bottom:6px;}
-  .stat-card .value{font-size:26px;font-weight:700;color:var(--primary);}
-  .stat-card .sub{font-size:12px;color:#64748b;margin-top:4px;}
+  .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;}
+  .stat-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;}
+  .stat-card .label{font-size:13px;color:#64748b;margin-bottom:7px;}
+  .stat-card .value{font-size:32px;font-weight:700;color:var(--primary);}
+  .stat-card .sub{font-size:13px;color:#64748b;margin-top:5px;}
 
   /* ---------- Bảng xếp hạng người dẫn dắt ---------- */
   .rank-row{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:#fff;}
@@ -63,10 +63,53 @@
   .rank-empty{color:#94a3b8;font-size:14px;padding:8px 0;}
 
   /* ---------- Khu vực pill tabs ---------- */
-  .kv-pills{display:flex;gap:6px;flex-wrap:wrap;}
-  .kv-pill{background:#e2e8f0;color:#334155;border:none;padding:7px 14px;border-radius:999px;font-size:13px;cursor:pointer;}
+  .kv-pills{display:flex;gap:8px;flex-wrap:wrap;}
+  .kv-pill{background:#e2e8f0;color:#334155;border:none;padding:9px 18px;border-radius:999px;font-size:14px;cursor:pointer;}
   .kv-pill:hover{background:#cbd5e1;}
   .kv-pill.active{background:var(--primary);color:#fff;}
+
+  /* ---------- Sub-tab trong "Hiện trạng khu vực" (TP / Trudo / Giáo dục) ---------- */
+  .kv-subpanel{display:none;}
+  .kv-subpanel.active{display:block;}
+
+  /* ---------- Card riêng từng Khu vực: TP (Thờ phượng) — dạng bảng gọn kiểu
+     Excel, mỗi card 1 Khu vực, 2 hàng (≥1 lần / ≥4 lần) x cột Tuần 1-5. ---------- */
+  .tp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px;}
+  .tp-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+  .tp-card-head{margin-bottom:10px;}
+  .tp-card-head .kv-name{font-weight:700;font-size:18px;}
+  .tp-table{width:100%;border-collapse:collapse;font-size:14px;}
+  .tp-table th{font-weight:600;color:#94a3b8;font-size:12px;text-align:center;padding:3px 4px 8px;}
+  .tp-table td{padding:5px;text-align:center;}
+  .tp-table th:first-child, .tp-table td:first-child{text-align:left;font-weight:600;color:#475569;padding-right:8px;white-space:nowrap;}
+  .tp-table tr:first-child td{padding-top:3px;}
+  .tp-table input{width:42px;padding:5px 3px;text-align:center;font-size:14px;transition:background .3s;}
+  .tp-table input.saved{background:#dcfce7;}
+  .tp-total-cell{font-weight:700;color:var(--primary);white-space:nowrap;cursor:help;}
+  .tp-trend{font-size:13px;font-weight:700;margin-left:3px;}
+  .tp-trend.up{color:#16a34a;}
+  .tp-trend.down{color:#dc2626;}
+  .tp-trend.flat{color:#94a3b8;}
+
+  /* ---------- Biểu đồ cột + đường kết hợp, thuần CSS/SVG (không phụ thuộc thư viện ngoài) ---------- */
+  .chart-legend{display:flex;gap:24px;margin-top:14px;font-size:14px;color:#475569;flex-wrap:wrap;justify-content:center;}
+  .chart-legend .dot{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:middle;}
+  .chart-row{display:flex;align-items:stretch;gap:6px;}
+  .chart-axis{position:relative;width:40px;flex-shrink:0;}
+  .chart-axis .axis-tick{position:absolute;right:8px;transform:translateY(-50%);font-size:12px;color:#94a3b8;white-space:nowrap;}
+  .chart{display:flex;align-items:flex-end;gap:28px;height:300px;padding:34px 14px 0;position:relative;flex:1;min-width:0;}
+  .chart-gridline{position:absolute;left:0;right:0;border-top:1px dashed #e9edf2;}
+  .chart-group{display:flex;flex-direction:column;align-items:center;flex:1;height:100%;justify-content:flex-end;min-width:0;position:relative;z-index:1;}
+  .chart-bars{display:flex;gap:10px;align-items:flex-end;justify-content:center;width:100%;height:100%;}
+  .chart-bar{width:32px;border-radius:4px 4px 0 0;position:relative;min-height:2px;}
+  .chart-bar .val{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:700;color:#334155;white-space:nowrap;}
+  .chart-label{font-size:14px;color:#64748b;margin-top:14px;text-align:center;}
+  .chart-line-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2;}
+  .chart-dot{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;border-width:2.5px;border-style:solid;transform:translate(-50%,-50%);pointer-events:none;z-index:3;}
+
+  /* ---------- Nhóm thành viên trong bảng nhập Giáo dục theo tuần ---------- */
+  .edu-member-head td{background:#f8fafc;font-weight:700;padding-top:10px !important;}
+  .edu-member-head .danger{float:right;padding:2px 8px;font-size:11px;}
 
   /* ---------- Loading ---------- */
   #loadingOverlay{position:fixed;inset:0;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-size:14px;color:#64748b;z-index:999;}
@@ -88,7 +131,8 @@
   <div id="sidebar">
     <h2>📋 Học viên</h2>
     <button type="button" class="nav-btn active" data-panel="stats" onclick="showPanel('stats')"><span class="nav-icon">📊</span> Tổng quan</button>
-    <button type="button" class="nav-btn" data-panel="add" onclick="showPanel('add')"><span class="nav-icon">📝</span> Nhập học viên và Đơn thuần</button>
+    <button type="button" class="nav-btn" data-panel="add" onclick="showPanel('add')"><span class="nav-icon">📝</span> Nhập học viên</button>
+    <button type="button" class="nav-btn" data-panel="donthuan" onclick="showPanel('donthuan')"><span class="nav-icon">📦</span> Đơn thuần</button>
     <button type="button" class="nav-btn" data-panel="goal" onclick="showPanel('goal')"><span class="nav-icon">🎯</span> Nhập mục tiêu</button>
     <button type="button" class="nav-btn" data-panel="kv" onclick="showPanel('kv')"><span class="nav-icon">🗺️</span> Hiện trạng khu vực</button>
   </div>
@@ -154,7 +198,7 @@
 
     <!-- ============ NHẬP HỌC VIÊN ============ -->
     <div id="panel-add" class="panel">
-      <h1>Nhập học viên và Đơn thuần</h1>
+      <h1>Nhập học viên</h1>
 
       <div class="card">
         <h3 id="formTitle">Thêm học viên mới</h3>
@@ -207,6 +251,12 @@
         </table>
         </div>
       </div>
+
+    </div>
+
+    <!-- ============ ĐƠN THUẦN ============ -->
+    <div id="panel-donthuan" class="panel">
+      <h1>Đơn thuần</h1>
 
       <div class="card">
         <h3>Nhập Đơn thuần thực tế</h3>
@@ -273,7 +323,7 @@
         </table>
         </div>
         <p style="font-size:12px;color:#64748b;margin-top:8px;">
-          MT = Mục tiêu · TT = Thực tế (tự tính từ Nhập học viên + nhật ký Đơn thuần ở tab "Nhập học viên và Đơn thuần") · % = TT ÷ MT.
+          MT = Mục tiêu · TT = Thực tế (tự tính từ tab "Nhập học viên" + nhật ký ở tab "Đơn thuần") · % = TT ÷ MT.
           Bấm ✏️ để nạp lại vào form phía trên sửa, 🗑️ để đưa mục tiêu Khu vực đó về 0.
         </p>
       </div>
@@ -291,27 +341,81 @@
             <input type="month" id="kvMonth">
           </div>
         </div>
+        <div class="kv-pills" id="kvSubTabs" style="margin-top:10px;">
+          <button type="button" class="kv-pill active" data-kvsub="tp" onclick="selectKVSubTab('tp')">TP</button>
+          <button type="button" class="kv-pill" data-kvsub="trudo" onclick="selectKVSubTab('trudo')">Trudo</button>
+          <button type="button" class="kv-pill" data-kvsub="edu" onclick="selectKVSubTab('edu')">Giáo dục</button>
+        </div>
       </div>
 
-      <div class="stat-cards">
-        <div class="stat-card"><div class="label">Khu vực</div><div class="value" id="kv_name" style="font-size:18px;">—</div></div>
-        <div class="stat-card"><div class="label">Tổng học viên (toàn bộ)</div><div class="value" id="kv_total">0</div></div>
+      <!-- ---- Sub-tab: TP (Thờ phượng) — scoped theo 1 Khu vực đang chọn ---- -->
+      <div id="kvsub-tp" class="kv-subpanel active">
+        <div class="card">
+          <div class="toolbar">
+            <h3 style="margin:0">TP — <span id="tp_kvName">—</span> (tháng <span id="tp_monthLabel"></span>)</h3>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <span id="tp_saveIndicator" style="font-size:12px;color:#16a34a;display:none;">✓ Đã lưu</span>
+              <div class="kv-pills">
+                <button type="button" class="kv-pill active" id="tpViewWeek" onclick="setTPView_('week')">Xem theo tuần</button>
+                <button type="button" class="kv-pill" id="tpViewMonth" onclick="setTPView_('month')">Xem theo tháng</button>
+              </div>
+            </div>
+          </div>
+          <p id="tpPastNotice" style="font-size:12px;color:#dc2626;margin:0 0 10px;display:none;">⚠️ Đang xem tháng đã qua — chỉ xem được, không thể sửa số liệu TP của tháng cũ.</p>
+          <div id="tpChart"></div>
+        </div>
+        <div class="card">
+          <h3>Nhập số liệu theo tuần</h3>
+          <p style="font-size:12px;color:#64748b;margin:0 0 10px;">Gõ số trực tiếp, rời ô là tự lưu. "≥1 lần"/"≥4 lần" = số người đã thờ phượng từ 1/4 lần trở lên tính từ đầu tháng, cột "Tổng" lấy số lớn nhất đã nhập (không cộng dồn) — di chuột vào ô Tổng để xem số của tháng trước.</p>
+          <table class="tp-table" id="tpEditTable"></table>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>Mục tiêu &amp; Thực tế tháng đang xem</h3>
-        <table>
-          <thead><tr><th></th><th>Mục tiêu</th><th>Thực tế</th><th>% hoàn thành</th></tr></thead>
-          <tbody id="kvGoalBody"></tbody>
-        </table>
+      <!-- ---- Sub-tab: Trudo (Đơn thuần / học viên đang nghe) ---- -->
+      <div id="kvsub-trudo" class="kv-subpanel">
+        <div class="card">
+          <h3 style="margin:0 0 10px">Trudo — <span id="trudo_kvName">—</span>: Tháng trước so với Tháng này</h3>
+          <div id="trudoChart"></div>
+        </div>
+
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">Tổng học viên (toàn bộ)</div><div class="value" id="kv_total">0</div></div>
+        </div>
+
+        <div class="card">
+          <h3>Mục tiêu &amp; Thực tế tháng đang xem</h3>
+          <table>
+            <thead><tr><th></th><th>Mục tiêu</th><th>Thực tế</th><th>% hoàn thành</th></tr></thead>
+            <tbody id="kvGoalBody"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3>Học viên theo Buổi (tháng đang xem)</h3>
+          <table>
+            <thead><tr><th>Tiến độ</th><th>Số học viên</th></tr></thead>
+            <tbody id="kvBuoiBody"></tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>Học viên theo Buổi (tháng đang xem)</h3>
-        <table>
-          <thead><tr><th>Tiến độ</th><th>Số học viên</th></tr></thead>
-          <tbody id="kvBuoiBody"></tbody>
-        </table>
+      <!-- ---- Sub-tab: Giáo dục — scoped theo 1 Khu vực đang chọn ---- -->
+      <div id="kvsub-edu" class="kv-subpanel">
+        <div class="card">
+          <h3 style="margin:0 0 10px">Giáo dục — <span id="edu_kvName">—</span>: % trung bình khu vực theo tuần (tháng <span id="edu_monthLabel"></span>)</h3>
+          <div id="eduChart"></div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <h3 style="margin:0">Thành viên (<span id="edu_kvName2">—</span>)</h3>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input id="edu_newTen" placeholder="Tên thành viên mới" style="width:auto;">
+              <button type="button" onclick="addEduMemberQuick()">+ Thêm</button>
+            </div>
+          </div>
+          <p style="font-size:12px;color:#64748b;margin:0 0 10px;">% là số lũy kế tính đến tuần đó, cột "Tổng" lấy số lớn nhất đã nhập trong tháng (không cộng dồn).</p>
+          <div style="overflow-x:auto"><table class="tp-table" id="eduEditTable"></table></div>
+        </div>
       </div>
     </div>
 
@@ -327,7 +431,8 @@
  * ========================================================= */
 const API_BASE = 'https://script.google.com/macros/s/AKfycbxDU7SXsnAkdRfAi8EXkknxwKHqCba1G4lIqs5H572do6mbkNkstvJVdDpsiL9LkBg/exec';
 const API_READ_FNS = new Set(['getDropdownOptions', 'getStudents', 'getStats', 'getProgressBreakdown',
-  'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getDonThuanLogs', 'getTopNguoiDanDat']);
+  'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getDonThuanLogs', 'getTopNguoiDanDat',
+  'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly']);
 
 function createRunner(){
   let onSuccess = null;
@@ -409,6 +514,83 @@ function pctText(p){
   return (p === null || p === undefined) ? '—' : p + '%';
 }
 
+// Biểu đồ cột đơn giản, tự vẽ bằng CSS (không phụ thuộc thư viện ngoài, vì
+// trang là site tĩnh không có build step). series: mảng {name, color, values}
+// (values cùng độ dài với categories). Chỉ hiện chú thích (legend) khi có từ
+// 2 series trở lên.
+// Chon buoc chia truc Y "dep" (1/2/5 x 10^n) roi lam tron max len boi so cua buoc do,
+// giong kieu Excel tu chon truc — tranh cac moc le nhu 12.5/37.5.
+function niceAxisStep_(rawMax, targetTicks){
+  const rough = (rawMax || 1) / targetTicks;
+  const mag = Math.pow(10, Math.floor(Math.log(rough) / Math.LN10));
+  const norm = rough / mag;
+  let niceNorm;
+  if (norm <= 1) niceNorm = 1;
+  else if (norm <= 2) niceNorm = 2;
+  else if (norm <= 5) niceNorm = 5;
+  else niceNorm = 10;
+  return niceNorm * mag;
+}
+function fmtAxisTick_(v){
+  return (Math.round(v * 10) / 10).toString().replace(/\.0$/, '');
+}
+function renderBarChart_(container, categories, series){
+  if (typeof container === 'string') container = document.getElementById(container);
+  if (!container) return;
+  const CHART_H = 300; // phai khop voi CSS .chart{height:...}
+  const BAR_MAX = 205; // chieu cao toi da cua cot (tinh theo axisMax), chua khoang trong cho nhan gia tri
+  let allValues = [0];
+  series.forEach(function(s){ allValues = allValues.concat(s.values); });
+  const rawMax = Math.max.apply(null, allValues) || 1;
+  const step = niceAxisStep_(rawMax, 4);
+  const axisMax = Math.max(step, Math.ceil(rawMax / step) * step);
+  const n = categories.length || 1;
+  const nSeries = series.length || 1;
+  const px_ = function(v){ return Math.max(2, (v / axisMax) * BAR_MAX); };
+  const yPct_ = function(v){ return (100 - (px_(v) / CHART_H * 100)).toFixed(2); };
+  const legend = series.length > 1 ? '<div class="chart-legend">' + series.map(function(s){
+    return '<span><span class="dot" style="background:' + s.color + '"></span>' + esc(s.name) + '</span>';
+  }).join('') + '</div>' : '';
+  // Truc Y + gridline ngang, buoc chia "dep" tu 0 den axisMax.
+  const ticks = [];
+  for (let t = 0; t <= axisMax + step / 2; t += step) ticks.push(t);
+  const axisHtml = '<div class="chart-axis">' + ticks.map(function(t){
+    return '<span class="axis-tick" style="top:' + yPct_(t) + '%;">' + fmtAxisTick_(t) + '</span>';
+  }).join('') + '</div>';
+  const gridHtml = ticks.map(function(t){
+    return '<div class="chart-gridline" style="top:' + yPct_(t) + '%;"></div>';
+  }).join('');
+  const groups = categories.map(function(cat, ci){
+    const bars = series.map(function(s){
+      const v = s.values[ci] || 0;
+      const h = Math.round(px_(v));
+      return '<div class="chart-bar" style="height:' + h + 'px;background:' + s.color + ';"><span class="val">' + esc(v) + '</span></div>';
+    }).join('');
+    return '<div class="chart-group"><div class="chart-bars">' + bars + '</div><div class="chart-label">' + esc(cat) + '</div></div>';
+  }).join('');
+  // Duong chi bao xu huong de len tren dinh cua TUNG cot (khong phai giua nhom), nen toa do X
+  // tinh theo vi tri rieng cua moi cot trong nhom — neu dung x giua nhom, cham se "lo lung" lech
+  // sang mot ben, nhin roi mat. Duong ke dung SVG (thang, khong bien dang khi ty le khac nhau),
+  // cham tron dung div HTML thuong (SVG circle se bi keo thanh elip khi viewBox bi ep ty le).
+  let lineSvg = '';
+  let dotsHtml = '';
+  if (n > 1) {
+    const shapes = series.map(function(s, si){
+      const pts = s.values.map(function(v, ci){
+        const x = (((ci + (si + 0.5) / nSeries)) / n * 100).toFixed(2);
+        return { x: x, y: yPct_(v) };
+      });
+      dotsHtml += pts.map(function(p){
+        return '<div class="chart-dot" style="left:' + p.x + '%;top:' + p.y + '%;border-color:' + s.color + ';"></div>';
+      }).join('');
+      const pointsAttr = pts.map(function(p){ return p.x + ',' + p.y; }).join(' ');
+      return '<polyline points="' + pointsAttr + '" fill="none" stroke="' + s.color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" opacity="0.75"/>';
+    }).join('');
+    lineSvg = '<svg class="chart-line-svg" viewBox="0 0 100 100" preserveAspectRatio="none">' + shapes + '</svg>';
+  }
+  container.innerHTML = '<div class="chart-row">' + axisHtml + '<div class="chart">' + gridHtml + groups + lineSvg + dotsHtml + '</div></div>' + legend;
+}
+
 function currentMonthKey(){
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
@@ -425,7 +607,7 @@ function loadDropdowns(){
     fillSelect(document.getElementById('gkv_to'), d.toList, '-- Chọn Khu vực --');
     fillSelect(document.getElementById('log_khuvuc'), d.toList, '-- Chọn Khu vực --', true);
     renderKVPills();
-    loadKVOverview();
+    loadKVSubTab();
   }).withFailureHandler(function(err){
     showMsg('Lỗi tải danh sách Khu vực/Tiến độ: ' + err.message, false);
   }).getDropdownOptions();
@@ -711,9 +893,10 @@ function goalMonthKey(){
   return document.getElementById('goalMonth').value || currentMonthKey();
 }
 
-// So sánh dạng chuỗi "yyyy-MM" vẫn đúng thứ tự thời gian (zero-padded).
+// Đã MỞ KHÓA cho phép sửa/nhập bù mục tiêu của tháng đã qua (trước đây hàm
+// này so sánh monthKey < currentMonthKey() để khóa — nay luôn trả về false).
 function isPastGoalMonth(monthKey){
-  return monthKey < currentMonthKey();
+  return false;
 }
 
 // Khóa/mở form nhập mục tiêu + nút Sửa/Xóa tùy theo tháng đang xem là quá khứ
@@ -868,37 +1051,373 @@ function loadGoalPanel(){
   loadLogs();
 }
 
-/** ---------- HIỆN TRẠNG KHU VỰC ---------- */
+/** ---------- HIỆN TRẠNG KHU VỰC ----------
+ * Điều hướng: chọn Khu vực TRƯỚC (kvPills, dùng chung cho cả 3 hạng mục),
+ * sau đó chọn 1 trong 3 hạng mục TP / Trudo / Giáo dục (kvSubTabs) — nội
+ * dung mỗi hạng mục chỉ hiện dữ liệu của đúng Khu vực đang chọn.
+ */
+let kvActiveSubTab = 'tp';
+
+function kvMonthKey(){
+  return document.getElementById('kvMonth').value || currentMonthKey();
+}
+
+function prevMonthKeyOf_(monthKey){
+  const parts = monthKey.split('-');
+  let y = Number(parts[0]), m = Number(parts[1]) - 1;
+  if (m < 1) { m = 12; y -= 1; }
+  return y + '-' + String(m).padStart(2, '0');
+}
+
 function renderKVPills(){
   if (!selectedKV && khuVucList.length) selectedKV = khuVucList[0];
   const pills = document.getElementById('kvPills');
   pills.innerHTML = khuVucList.map(function(kv){
     return '<button type="button" class="kv-pill' + (kv === selectedKV ? ' active' : '') + '" onclick="selectKV(\'' + kv + '\')">' + esc(kv) + '</button>';
   }).join('');
-  document.getElementById('kv_name').textContent = selectedKV || '—';
 }
 
+// Đổi Khu vực đang xem -> nạp lại dữ liệu của BẤT KỲ hạng mục nào đang mở.
 function selectKV(kv){
   selectedKV = kv;
   renderKVPills();
-  loadKVOverview();
+  loadKVSubTab();
 }
 
+function selectKVSubTab(name){
+  kvActiveSubTab = name;
+  document.querySelectorAll('.kv-subpanel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('#kvSubTabs .kv-pill').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('kvsub-' + name).classList.add('active');
+  document.querySelector('#kvSubTabs .kv-pill[data-kvsub="' + name + '"]').classList.add('active');
+  loadKVSubTab();
+}
+
+// Nạp lại đúng dữ liệu của tab con đang mở (gọi khi đổi Khu vực, đổi tháng,
+// hoặc lần đầu vào tab "Hiện trạng khu vực").
+function loadKVSubTab(){
+  if (kvActiveSubTab === 'tp') loadTPPanel();
+  else if (kvActiveSubTab === 'trudo') loadKVOverview();
+  else if (kvActiveSubTab === 'edu') loadEduPanel();
+}
+document.getElementById('kvMonth').addEventListener('change', loadKVSubTab);
+
+/** ---------- TP (Thờ phượng) — 1 Khu vực đang chọn, có 2 kiểu xem biểu đồ ---------- */
+// Đã MỞ KHÓA cho phép sửa/nhập bù số liệu TP của tháng đã qua (tương tự Mục
+// tiêu KV — trước đây so sánh monthKey < currentMonthKey() để khóa).
+function isPastMonthTP_(monthKey){
+  return false;
+}
+
+let tpViewMode = 'week'; // 'week' | 'month'
+
+function setTPView_(mode){
+  tpViewMode = mode;
+  document.getElementById('tpViewWeek').classList.toggle('active', mode === 'week');
+  document.getElementById('tpViewMonth').classList.toggle('active', mode === 'month');
+  renderTPChart_(window._tpCurrentData);
+}
+
+function loadTPPanel(){
+  if (!selectedKV) return;
+  const monthKey = kvMonthKey();
+  const past = isPastMonthTP_(monthKey);
+  document.getElementById('tpPastNotice').style.display = past ? 'block' : 'none';
+  document.getElementById('tp_kvName').textContent = selectedKV;
+  document.getElementById('tp_monthLabel').textContent = monthKey;
+  google.script.run.withSuccessHandler(function(list){
+    const row = list.find(function(r){ return r.khuVuc === selectedKV; }) ||
+      { khuVuc: selectedKV, oneLan: { prevMonthTotal: 0, weeks: [0,0,0,0,0], total: 0 }, fourLan: { prevMonthTotal: 0, weeks: [0,0,0,0,0], total: 0 } };
+    window._tpCurrentData = row;
+    renderTPChart_(row);
+    renderTPEditTable_(row, past);
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi tải bảng TP: ' + err.message, false);
+  }).getTPSummary(monthKey);
+}
+
+function renderTPChart_(row){
+  const el = document.getElementById('tpChart');
+  if (!row) { el.innerHTML = ''; return; }
+  if (tpViewMode === 'week') {
+    renderBarChart_(el, ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'], [
+      { name: '≥1 lần', color: '#2563eb', values: row.oneLan.weeks },
+      { name: '≥4 lần', color: '#f59e0b', values: row.fourLan.weeks }
+    ]);
+  } else {
+    renderBarChart_(el, ['Tháng trước', 'Tháng này'], [
+      { name: '≥1 lần', color: '#2563eb', values: [row.oneLan.prevMonthTotal, row.oneLan.total] },
+      { name: '≥4 lần', color: '#f59e0b', values: [row.fourLan.prevMonthTotal, row.fourLan.total] }
+    ]);
+  }
+}
+
+function tpTrendHtml_(diff){
+  const trend = diff > 0 ? 'up' : (diff < 0 ? 'down' : 'flat');
+  const icon = diff > 0 ? '▲' : (diff < 0 ? '▼' : '–');
+  return '<span class="tp-trend ' + trend + '">' + icon + (diff > 0 ? '+' : '') + diff + '</span>';
+}
+
+// 1 hàng chỉ số (≥1 lần / ≥4 lần): nhãn ngắn + 5 ô Tuần nhập trực tiếp + ô
+// Tổng (số lớn nhất trong 5 tuần, hover xem tháng trước).
+function tpMetricRowHtml_(metricKey, label, data, past){
+  const cells = data.weeks.map(function(w, i){
+    return '<td><input type="number" min="0" value="' + esc(w) + '" ' + (past ? 'disabled' : '') +
+      ' data-metric="' + metricKey + '" data-week="' + (i + 1) + '" onchange="saveTPCell(this)"></td>';
+  }).join('');
+  return '<tr data-prev="' + esc(data.prevMonthTotal) + '">' +
+    '<td>' + label + '</td>' + cells +
+    '<td class="tp-total-cell" id="tpTotal_' + metricKey + '" title="Tháng trước: ' + esc(data.prevMonthTotal) + '">' +
+      esc(data.total) + tpTrendHtml_(data.total - data.prevMonthTotal) +
+    '</td>' +
+  '</tr>';
+}
+
+function renderTPEditTable_(row, past){
+  const el = document.getElementById('tpEditTable');
+  el.innerHTML = '<thead><tr><th></th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>Tổng</th></tr></thead><tbody>' +
+    tpMetricRowHtml_('1lan', '≥1 lần', row.oneLan, past) +
+    tpMetricRowHtml_('4lan', '≥4 lần', row.fourLan, past) +
+  '</tbody>';
+}
+
+// Tự lưu ngay khi rời khỏi 1 ô Tuần (blur/Enter) — không cần nút Lưu riêng.
+function saveTPCell(inputEl){
+  const monthKey = kvMonthKey();
+  if (isPastMonthTP_(monthKey)) return;
+  const metric = inputEl.dataset.metric; // '1lan' | '4lan'
+  const week = inputEl.dataset.week;
+  const soLuong = inputEl.value;
+  inputEl.disabled = true;
+  google.script.run.withSuccessHandler(function(){
+    inputEl.disabled = false;
+    inputEl.classList.add('saved');
+    setTimeout(function(){ inputEl.classList.remove('saved'); }, 700);
+    const indicator = document.getElementById('tp_saveIndicator');
+    indicator.style.display = 'inline';
+    clearTimeout(window._tpSaveTimer);
+    window._tpSaveTimer = setTimeout(function(){ indicator.style.display = 'none'; }, 1500);
+    recomputeTPMetricTotal_(metric);
+    refreshTPFromTable_();
+  }).withFailureHandler(function(err){
+    inputEl.disabled = false;
+    showMsg('Lỗi lưu TP: ' + err.message, false);
+  }).saveTPWeek(monthKey, selectedKV, metric, week, soLuong);
+}
+
+// Tính lại ô Tổng (số LỚN NHẤT trong 5 ô Tuần, không cộng dồn) ngay trên
+// trình duyệt sau khi lưu 1 ô, đồng thời cập nhật mũi tên so với tháng trước.
+function recomputeTPMetricTotal_(metric){
+  const totalCell = document.getElementById('tpTotal_' + metric);
+  if (!totalCell) return;
+  const row = totalCell.closest('tr');
+  const inputs = row.querySelectorAll('input[type="number"]');
+  let max = 0;
+  inputs.forEach(function(i){ const v = Number(i.value) || 0; if (v > max) max = v; });
+  const prevTotal = Number(row.dataset.prev) || 0;
+  totalCell.innerHTML = max + tpTrendHtml_(max - prevTotal);
+  totalCell.title = 'Tháng trước: ' + prevTotal;
+}
+
+// Đọc lại toàn bộ bảng nhập (không gọi lại server) để cập nhật biểu đồ ngay
+// sau khi lưu 1 ô — giữ dữ liệu trên trình duyệt luôn khớp bảng.
+function refreshTPFromTable_(){
+  if (!window._tpCurrentData) return;
+  const table = document.getElementById('tpEditTable');
+  const rows = table.querySelectorAll('tbody tr');
+  function readWeeks(tr){
+    const inputs = tr.querySelectorAll('input[type="number"]');
+    return Array.prototype.map.call(inputs, function(i){ return Number(i.value) || 0; });
+  }
+  const w1 = readWeeks(rows[0]);
+  const w4 = readWeeks(rows[1]);
+  window._tpCurrentData.oneLan.weeks = w1;
+  window._tpCurrentData.oneLan.total = Math.max.apply(null, w1.concat([0]));
+  window._tpCurrentData.fourLan.weeks = w4;
+  window._tpCurrentData.fourLan.total = Math.max.apply(null, w4.concat([0]));
+  renderTPChart_(window._tpCurrentData);
+}
+
+/** ---------- Trudo — 1 Khu vực đang chọn, biểu đồ Tháng trước vs Tháng này ---------- */
 function loadKVOverview(){
   if (!selectedKV) return;
-  const monthKey = document.getElementById('kvMonth').value || currentMonthKey();
+  const monthKey = kvMonthKey();
+  const prevKey = prevMonthKeyOf_(monthKey);
+  document.getElementById('trudo_kvName').textContent = selectedKV;
+  window._trudoCurActual = null;
+  window._trudoPrevActual = null;
+
   google.script.run.withSuccessHandler(function(o){
-    document.getElementById('kv_name').textContent = o.khuVuc;
     document.getElementById('kv_total').textContent = o.tongHocVien;
     document.getElementById('kvGoalBody').innerHTML = o.goalSummary ? renderGoalRows(o.goalSummary) : '';
     document.getElementById('kvBuoiBody').innerHTML = o.breakdown.length ? o.breakdown.map(function(r){
       return '<tr><td>' + esc(r.tienDo) + '</td><td class="stats-num">' + esc(r.count) + '</td></tr>';
     }).join('') : '<tr><td colspan="2" style="color:#94a3b8;">Chưa có dữ liệu trong tháng này</td></tr>';
+    window._trudoCurActual = o.goalSummary ? o.goalSummary.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
+    renderTrudoChartIfReady_();
   }).withFailureHandler(function(err){
     showMsg('Lỗi tải hiện trạng khu vực: ' + err.message, false);
   }).getKhuVucOverview(monthKey, selectedKV);
+
+  google.script.run.withSuccessHandler(function(list){
+    const row = list.find(function(s){ return s.khuVuc === selectedKV; });
+    window._trudoPrevActual = row ? row.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
+    renderTrudoChartIfReady_();
+  }).withFailureHandler(function(){
+    window._trudoPrevActual = { donThuan: 0, huuHieu: 0, bt: 0 };
+    renderTrudoChartIfReady_();
+  }).getMonthlySummaryByKV(prevKey);
 }
-document.getElementById('kvMonth').addEventListener('change', loadKVOverview);
+
+function renderTrudoChartIfReady_(){
+  if (!window._trudoCurActual || !window._trudoPrevActual) return;
+  renderBarChart_('trudoChart', ['Tháng trước', 'Tháng này'], [
+    { name: 'Đơn thuần', color: '#2563eb', values: [window._trudoPrevActual.donThuan, window._trudoCurActual.donThuan] },
+    { name: 'Hữu hiệu', color: '#f59e0b', values: [window._trudoPrevActual.huuHieu, window._trudoCurActual.huuHieu] },
+    { name: 'BT', color: '#16a34a', values: [window._trudoPrevActual.bt, window._trudoCurActual.bt] }
+  ]);
+}
+
+/** ---------- GIÁO DỤC — 1 Khu vực đang chọn, % theo tuần từng thành viên ---------- */
+let eduCurrentList = [];
+
+function loadEduPanel(){
+  if (!selectedKV) return;
+  const monthKey = kvMonthKey();
+  document.getElementById('edu_kvName').textContent = selectedKV;
+  document.getElementById('edu_kvName2').textContent = selectedKV;
+  document.getElementById('edu_monthLabel').textContent = monthKey;
+  google.script.run.withSuccessHandler(function(list){
+    eduCurrentList = list;
+    renderEduChart_(list);
+    renderEduEditTable_(list);
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi tải Giáo dục: ' + err.message, false);
+  }).getGiaoDucWeekly(monthKey, selectedKV);
+}
+
+// % trung bình cả Khu vực theo từng tuần (làm tròn 1 chữ số thập phân).
+function avgWeeksOf_(list, field){
+  if (!list.length) return [0, 0, 0, 0, 0];
+  const sums = [0, 0, 0, 0, 0];
+  list.forEach(function(m){
+    m[field].weeks.forEach(function(v, i){ sums[i] += v; });
+  });
+  return sums.map(function(s){ return Math.round((s / list.length) * 10) / 10; });
+}
+
+function renderEduChart_(list){
+  const el = document.getElementById('eduChart');
+  if (!list.length) {
+    el.innerHTML = '<p style="color:#94a3b8;font-size:13px;">Chưa có thành viên nào trong khu vực này.</p>';
+    return;
+  }
+  renderBarChart_(el, ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'], [
+    { name: 'EDU LMS (%)', color: '#2563eb', values: avgWeeksOf_(list, 'eduLms') },
+    { name: 'Trực tuyến 127 (%)', color: '#f59e0b', values: avgWeeksOf_(list, 'truc127') }
+  ]);
+}
+
+function eduMetricRowHtml_(idx, field, label, data){
+  const cells = data.weeks.map(function(w, i){
+    return '<td><input type="number" min="0" max="100" value="' + esc(w) + '" id="eduInput_' + idx + '_' + field + '_' + (i + 1) + '" ' +
+      'data-idx="' + idx + '" data-field="' + field + '" data-week="' + (i + 1) + '" onchange="saveEduCell(this)"></td>';
+  }).join('');
+  return '<tr data-prev="' + esc(data.prevMonthTotal) + '">' +
+    '<td>' + label + '</td>' + cells +
+    '<td class="tp-total-cell" id="eduTotal_' + idx + '_' + field + '" title="Tháng trước: ' + esc(data.prevMonthTotal) + '">' + esc(data.total) + '%</td>' +
+    '<td></td>' +
+  '</tr>';
+}
+
+function renderEduEditTable_(list){
+  const el = document.getElementById('eduEditTable');
+  if (!list.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<thead><tr><th></th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>Tổng</th><th></th></tr></thead><tbody>' +
+    list.map(function(m, idx){
+      return '<tr class="edu-member-head"><td colspan="8">' + esc(m.ten) +
+        '<button type="button" class="danger" onclick="removeEduMember(' + idx + ')">Xóa</button></td></tr>' +
+        eduMetricRowHtml_(idx, 'eduLms', 'EDU LMS (%)', m.eduLms) +
+        eduMetricRowHtml_(idx, 'truc127', 'Trực tuyến 127 (%)', m.truc127);
+    }).join('') +
+  '</tbody>';
+}
+
+function getEduInputValue_(idx, field, week){
+  const el = document.getElementById('eduInput_' + idx + '_' + field + '_' + week);
+  return el ? el.value : 0;
+}
+
+// Mỗi thành viên/tuần chỉ có 1 dòng dữ liệu (lưu chung cả EDU LMS lẫn Trực
+// tuyến 127), nhưng bảng hiển thị 2 hàng riêng (2 chỉ số) — nên khi sửa 1 ô
+// phải gửi kèm giá trị hiện tại của ô kia (cùng thành viên, cùng tuần).
+function saveEduCell(inputEl){
+  const monthKey = kvMonthKey();
+  const idx = Number(inputEl.dataset.idx);
+  const field = inputEl.dataset.field; // 'eduLms' | 'truc127'
+  const week = inputEl.dataset.week;
+  const val = inputEl.value;
+  const member = eduCurrentList[idx];
+  if (!member) return;
+  const otherField = field === 'eduLms' ? 'truc127' : 'eduLms';
+  const otherVal = getEduInputValue_(idx, otherField, week);
+  const eduLmsVal = field === 'eduLms' ? val : otherVal;
+  const truc127Val = field === 'truc127' ? val : otherVal;
+  inputEl.disabled = true;
+  google.script.run.withSuccessHandler(function(){
+    inputEl.disabled = false;
+    inputEl.classList.add('saved');
+    setTimeout(function(){ inputEl.classList.remove('saved'); }, 700);
+    recomputeEduMetricTotal_(idx, field);
+    renderEduChart_(eduCurrentList);
+  }).withFailureHandler(function(err){
+    inputEl.disabled = false;
+    showMsg('Lỗi lưu Giáo dục: ' + err.message, false);
+  }).saveGiaoDucWeek(monthKey, selectedKV, member.ten, week, eduLmsVal, truc127Val);
+}
+
+function recomputeEduMetricTotal_(idx, field){
+  const totalCell = document.getElementById('eduTotal_' + idx + '_' + field);
+  if (!totalCell) return;
+  let max = 0;
+  const weeks = [1, 2, 3, 4, 5].map(function(w){
+    const el = document.getElementById('eduInput_' + idx + '_' + field + '_' + w);
+    const v = el ? (Number(el.value) || 0) : 0;
+    if (v > max) max = v;
+    return v;
+  });
+  totalCell.textContent = max + '%';
+  if (eduCurrentList[idx]) {
+    eduCurrentList[idx][field].total = max;
+    eduCurrentList[idx][field].weeks = weeks;
+  }
+}
+
+function addEduMemberQuick(){
+  if (!selectedKV) { showMsg('Vui lòng chọn Khu vực', false); return; }
+  const input = document.getElementById('edu_newTen');
+  const ten = input.value.trim();
+  if (!ten) { showMsg('Vui lòng nhập Tên thành viên', false); return; }
+  google.script.run.withSuccessHandler(function(){
+    showMsg('Đã thêm thành viên', true);
+    input.value = '';
+    loadEduPanel();
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi: ' + err.message, false);
+  }).addGiaoDucMember({ khuVuc: selectedKV, ten: ten });
+}
+
+function removeEduMember(idx){
+  const member = eduCurrentList[idx];
+  if (!member) return;
+  if (!confirm('Xóa thành viên "' + member.ten + '" khỏi khu vực (xóa toàn bộ lịch sử)?')) return;
+  google.script.run.withSuccessHandler(function(){
+    showMsg('Đã xóa', true);
+    loadEduPanel();
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi: ' + err.message, false);
+  }).deleteGiaoDucMember(selectedKV, member.ten);
+}
 
 /** ---------- Khởi động ---------- */
 function loadAll(){
