@@ -104,6 +104,9 @@
   .chart-line-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2;}
   .chart-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#fff;border-width:2.75px;border-style:solid;transform:translate(-50%,-50%);pointer-events:none;z-index:3;box-shadow:0 1px 3px rgba(15,23,42,.25);}
   .chart-point-val{position:absolute;transform:translate(-50%,-100%);font-size:13px;font-weight:700;white-space:nowrap;pointer-events:none;z-index:4;}
+  .chart-split{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .chart-split-title{font-size:14px;font-weight:700;margin-bottom:8px;}
+  @media (max-width: 720px){ .chart-split{grid-template-columns:1fr;} }
 
   /* ---------- Nhóm thành viên trong bảng nhập Giáo dục theo tuần ---------- */
   .edu-member-head td{background:#f8fafc;font-weight:700;padding-top:10px !important;}
@@ -360,7 +363,16 @@
             </div>
           </div>
           <p id="tpPastNotice" style="font-size:12px;color:#dc2626;margin:0 0 10px;display:none;">⚠️ Đang xem tháng đã qua — chỉ xem được, không thể sửa số liệu TP của tháng cũ.</p>
-          <div id="tpChart"></div>
+          <div class="chart-split">
+            <div>
+              <div class="chart-split-title" style="color:#2563eb;">≥1 lần</div>
+              <div id="tpChart1"></div>
+            </div>
+            <div>
+              <div class="chart-split-title" style="color:#f59e0b;">≥4 lần</div>
+              <div id="tpChart2"></div>
+            </div>
+          </div>
         </div>
         <div class="card">
           <h3>Nhập số liệu theo tuần</h3>
@@ -1214,20 +1226,18 @@ function loadTPPanel(){
   }).getTPSummary(monthKey);
 }
 
+// Tach thanh 2 bieu do rieng canh nhau (trai "≥1 lan", phai "≥4 lan") thay vi
+// gop chung 1 bieu do — de doc hon vi 2 chi so nay thuong co gia tri gan nhau,
+// gop chung de bi roi/kho phan biet du da chong nhan.
 function renderTPChart_(row){
-  const el = document.getElementById('tpChart');
-  if (!row) { el.innerHTML = ''; return; }
-  if (tpViewMode === 'week') {
-    renderBarChart_(el, ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'], [
-      { name: '≥1 lần', color: '#2563eb', values: row.oneLan.weeks },
-      { name: '≥4 lần', color: '#f59e0b', values: row.fourLan.weeks }
-    ]);
-  } else {
-    renderBarChart_(el, ['Tháng trước', 'Tháng này'], [
-      { name: '≥1 lần', color: '#2563eb', values: [row.oneLan.prevMonthTotal, row.oneLan.total] },
-      { name: '≥4 lần', color: '#f59e0b', values: [row.fourLan.prevMonthTotal, row.fourLan.total] }
-    ]);
-  }
+  const el1 = document.getElementById('tpChart1');
+  const el2 = document.getElementById('tpChart2');
+  if (!row) { el1.innerHTML = ''; el2.innerHTML = ''; return; }
+  const categories = tpViewMode === 'week' ? ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'] : ['Tháng trước', 'Tháng này'];
+  const oneLanValues = tpViewMode === 'week' ? row.oneLan.weeks : [row.oneLan.prevMonthTotal, row.oneLan.total];
+  const fourLanValues = tpViewMode === 'week' ? row.fourLan.weeks : [row.fourLan.prevMonthTotal, row.fourLan.total];
+  renderBarChart_(el1, categories, [{ name: '≥1 lần', color: '#2563eb', values: oneLanValues }]);
+  renderBarChart_(el2, categories, [{ name: '≥4 lần', color: '#f59e0b', values: fourLanValues }]);
 }
 
 function tpTrendHtml_(diff){
