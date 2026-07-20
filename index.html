@@ -115,6 +115,27 @@
   .chart-split-title{font-size:14px;font-weight:700;margin-bottom:8px;}
   @media (max-width: 720px){ .chart-split{grid-template-columns:1fr;} }
 
+  /* ---------- Lịch làm việc tuần (bảng lịch Thứ 2 - Chủ nhật) ---------- */
+  .lich-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .lich-toolbar .week-label{font-weight:700;font-size:15px;}
+  .lich-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;align-items:start;}
+  .lich-day{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;min-height:110px;}
+  .lich-day.is-today{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary) inset;}
+  .lich-day-head{font-weight:700;font-size:13px;margin-bottom:8px;color:#334155;}
+  .lich-day-head .d{color:#94a3b8;font-weight:400;}
+  .lich-event{background:#f1f5f9;border-radius:6px;padding:7px 8px;margin-bottom:7px;font-size:12.5px;border-left:3px solid var(--primary);}
+  .lich-event .lich-time{font-weight:700;color:#1e293b;}
+  .lich-event .lich-noidung{font-weight:600;margin:3px 0;color:#1e293b;word-break:break-word;}
+  .lich-event .lich-meta{color:#64748b;font-size:12px;line-height:1.5;}
+  .lich-event .lich-actions{margin-top:5px;}
+  .lich-event .lich-actions button{padding:2px 7px;font-size:11px;margin-right:4px;}
+  .lich-badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-top:4px;}
+  .lich-badge.chua-dien-ra{background:#dbeafe;color:#1e40af;}
+  .lich-badge.da-dien-ra{background:#dcfce7;color:#166534;}
+  .lich-badge.huy{background:#fee2e2;color:#991b1b;}
+  .lich-empty{color:#cbd5e1;font-size:12px;text-align:center;padding:10px 0;}
+  @media (max-width: 900px){ .lich-grid{grid-template-columns:1fr;} }
+
   /* ---------- Nhóm thành viên trong bảng nhập Giáo dục theo tuần ---------- */
   .edu-member-head td{background:#f8fafc;font-weight:700;padding-top:10px !important;}
   .edu-member-head .danger{float:right;padding:2px 8px;font-size:11px;}
@@ -143,6 +164,7 @@
     <button type="button" class="nav-btn" data-panel="donthuan" onclick="showPanel('donthuan')"><span class="nav-icon">📦</span> Đơn thuần</button>
     <button type="button" class="nav-btn" data-panel="goal" onclick="showPanel('goal')"><span class="nav-icon">🎯</span> Nhập mục tiêu</button>
     <button type="button" class="nav-btn" data-panel="kv" onclick="showPanel('kv')"><span class="nav-icon">🗺️</span> Hiện trạng khu vực</button>
+    <button type="button" class="nav-btn" data-panel="lich" onclick="showPanel('lich')"><span class="nav-icon">🗓️</span> Lịch làm việc</button>
   </div>
 
   <div id="main">
@@ -436,6 +458,58 @@
       </div>
     </div>
 
+    <!-- ============ LỊCH LÀM VIỆC ============ -->
+    <div id="panel-lich" class="panel">
+      <h1>Lịch làm việc</h1>
+
+      <div class="card">
+        <div class="lich-toolbar">
+          <button type="button" class="secondary" onclick="shiftLichWeek(-7)">◀ Tuần trước</button>
+          <span class="week-label" id="lich_weekLabel">—</span>
+          <button type="button" class="secondary" onclick="shiftLichWeek(7)">Tuần sau ▶</button>
+          <button type="button" class="secondary" onclick="goToCurrentLichWeek()">Về tuần này</button>
+          <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+            <label style="margin:0;">Nhảy đến ngày:</label>
+            <input type="date" id="lich_jumpDate" style="width:auto;">
+          </div>
+        </div>
+        <p style="font-size:12px;color:#64748b;margin:10px 0 0;">Lịch của cả nhóm — mỗi tuần tự nhập lại từ đầu, không tự lặp lại tuần trước.</p>
+      </div>
+
+      <div class="card">
+        <h3 id="lichFormTitle">Thêm công việc</h3>
+        <form id="lichForm">
+          <div class="grid">
+            <div><label>Ngày *</label><input type="date" id="lich_ngay" required></div>
+            <div><label>Giờ bắt đầu</label><input type="time" id="lich_giobatdau"></div>
+            <div><label>Giờ kết thúc</label><input type="time" id="lich_gioketthuc"></div>
+            <div><label>Khu vực</label><select id="lich_khuvuc"></select></div>
+            <div><label>Người phụ trách</label><input id="lich_nguoiphutrach" list="nddDatalist" autocomplete="off" placeholder="Gõ để tìm (không bắt buộc)"></div>
+            <div><label>Địa điểm</label><input id="lich_diadiem"></div>
+            <div><label>Trạng thái</label>
+              <select id="lich_trangthai">
+                <option value="Chưa diễn ra">Chưa diễn ra</option>
+                <option value="Đã diễn ra">Đã diễn ra</option>
+                <option value="Hủy">Hủy</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:10px;">
+            <label>Nội dung công việc *</label>
+            <textarea id="lich_noidung" required placeholder="Ví dụ: Họp nhóm khu vực A, thăm học viên..."></textarea>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;">
+            <button type="submit" id="lichSubmitBtn">Thêm</button>
+            <button type="button" class="secondary" id="lichCancelBtn" onclick="cancelLichEdit()" style="display:none;">Hủy sửa</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="lich-grid" id="lichGrid"></div>
+      </div>
+    </div>
+
   </div>
 
 <script>
@@ -449,7 +523,7 @@
 const API_BASE = 'https://script.google.com/macros/s/AKfycbxDU7SXsnAkdRfAi8EXkknxwKHqCba1G4lIqs5H572do6mbkNkstvJVdDpsiL9LkBg/exec';
 const API_READ_FNS = new Set(['getDropdownOptions', 'getStudents', 'getStats', 'getProgressBreakdown',
   'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getDonThuanLogs', 'getTopNguoiDanDat',
-  'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly']);
+  'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly', 'getLichTuan']);
 
 // Cache tạm ở trình duyệt cho các hàm ĐỌC (API_READ_FNS) — key là "tênHàm::tham số",
 // giá trị sống trong CACHE_TTL_MS. Mục đích: khi chuyển qua lại Khu vực/tab đã xem
@@ -703,6 +777,7 @@ function loadDropdowns(){
     fillSelect(document.getElementById('filterTo'), d.toList, '-- Lọc theo Khu vực --', true);
     fillSelect(document.getElementById('gkv_to'), d.toList, '-- Chọn Khu vực --');
     fillSelect(document.getElementById('log_khuvuc'), d.toList, '-- Chọn Khu vực --', true);
+    fillSelect(document.getElementById('lich_khuvuc'), d.toList, '-- Chọn Khu vực --', true);
     renderKVPills();
     loadKVSubTab();
   }).withFailureHandler(function(err){
@@ -1521,6 +1596,182 @@ function removeEduMember(idx){
   }).deleteGiaoDucMember(selectedKV, member.ten);
 }
 
+/** =========================================================
+ *  LỊCH LÀM VIỆC TUẦN — bảng lịch Thứ 2 - Chủ nhật, cả nhóm cùng xem, mỗi
+ *  tuần tự nhập lại từ đầu (KHÔNG lặp lại tự động từ tuần trước).
+ * ========================================================= */
+let lichWeekStart = null;   // Date, luôn là Thứ 2 00:00 của tuần đang xem
+let lichEditRow = null;     // null = đang thêm mới; số = đang sửa dòng đó
+const LICH_DAY_NAMES_ = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+
+function mondayOf_(d){
+  const r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const day = r.getDay(); // 0 = Chủ nhật
+  const diff = (day === 0 ? -6 : 1) - day;
+  r.setDate(r.getDate() + diff);
+  return r;
+}
+
+function ymd_(d){
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function fmtVNDate_(d){
+  return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function initLichWeek_(){
+  if (!lichWeekStart) lichWeekStart = mondayOf_(new Date());
+}
+
+function shiftLichWeek(days){
+  initLichWeek_();
+  lichWeekStart.setDate(lichWeekStart.getDate() + days);
+  loadLichTuan();
+}
+
+function goToCurrentLichWeek(){
+  lichWeekStart = mondayOf_(new Date());
+  loadLichTuan();
+}
+
+document.getElementById('lich_jumpDate').addEventListener('change', function(){
+  const v = this.value;
+  if (!v) return;
+  const parts = v.split('-');
+  lichWeekStart = mondayOf_(new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
+  loadLichTuan();
+});
+
+function lichBadgeClass_(trangThai){
+  if (trangThai === 'Đã diễn ra') return 'da-dien-ra';
+  if (trangThai === 'Hủy') return 'huy';
+  return 'chua-dien-ra';
+}
+
+function loadLichTuan(){
+  initLichWeek_();
+  const end = new Date(lichWeekStart.getTime());
+  end.setDate(end.getDate() + 6);
+  document.getElementById('lich_weekLabel').textContent = 'Tuần ' + fmtVNDate_(lichWeekStart) + ' - ' + fmtVNDate_(end) + '/' + end.getFullYear();
+  document.getElementById('lich_jumpDate').value = ymd_(lichWeekStart);
+  google.script.run.withSuccessHandler(renderLichGrid).withFailureHandler(function(err){
+    showMsg('Lỗi tải Lịch làm việc: ' + err.message, false);
+  }).getLichTuan(ymd_(lichWeekStart));
+}
+
+function renderLichGrid(list){
+  const todayStr = ymd_(new Date());
+  const byDay = {};
+  (list || []).forEach(function(ev){
+    (byDay[ev.ngay] = byDay[ev.ngay] || []).push(ev);
+  });
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(lichWeekStart.getTime());
+    d.setDate(d.getDate() + i);
+    const dStr = ymd_(d);
+    const events = byDay[dStr] || [];
+    const isToday = dStr === todayStr;
+    html += '<div class="lich-day' + (isToday ? ' is-today' : '') + '">' +
+      '<div class="lich-day-head">' + LICH_DAY_NAMES_[i] + ' <span class="d">' + fmtVNDate_(d) + '</span></div>';
+    if (!events.length) {
+      html += '<div class="lich-empty">—</div>';
+    } else {
+      events.forEach(function(ev){
+        const timeStr = ev.gioBatDau ? esc(ev.gioBatDau) + (ev.gioKetThuc ? ' - ' + esc(ev.gioKetThuc) : '') : '';
+        let meta = '';
+        if (ev.nguoiPhuTrach) meta += 'PT: ' + esc(ev.nguoiPhuTrach) + '<br>';
+        if (ev.khuVuc) meta += 'KV: ' + esc(ev.khuVuc) + '<br>';
+        if (ev.diaDiem) meta += 'Tại: ' + esc(ev.diaDiem);
+        html += '<div class="lich-event">' +
+          (timeStr ? '<div class="lich-time">' + timeStr + '</div>' : '') +
+          '<div class="lich-noidung">' + esc(ev.noiDung) + '</div>' +
+          (meta ? '<div class="lich-meta">' + meta + '</div>' : '') +
+          '<span class="lich-badge ' + lichBadgeClass_(ev.trangThai) + '">' + esc(ev.trangThai) + '</span>' +
+          '<div class="lich-actions">' +
+            '<button class="edit" onclick="editLichEvent(' + ev.row + ')">Sửa</button>' +
+            '<button class="danger" onclick="removeLichEvent(' + ev.row + ')">Xóa</button>' +
+          '</div>' +
+        '</div>';
+      });
+    }
+    html += '</div>';
+  }
+  document.getElementById('lichGrid').innerHTML = html;
+  window._lichCurrentList = list || [];
+}
+
+function resetLichForm(){
+  document.getElementById('lichForm').reset();
+  document.getElementById('lich_trangthai').value = 'Chưa diễn ra';
+  lichEditRow = null;
+  document.getElementById('lichFormTitle').textContent = 'Thêm công việc';
+  document.getElementById('lichSubmitBtn').textContent = 'Thêm';
+  document.getElementById('lichCancelBtn').style.display = 'none';
+}
+
+function editLichEvent(row){
+  const ev = (window._lichCurrentList || []).find(function(e){ return e.row === row; });
+  if (!ev) return;
+  lichEditRow = row;
+  document.getElementById('lich_ngay').value = ev.ngay || '';
+  document.getElementById('lich_giobatdau').value = ev.gioBatDau || '';
+  document.getElementById('lich_gioketthuc').value = ev.gioKetThuc || '';
+  document.getElementById('lich_khuvuc').value = ev.khuVuc || '';
+  document.getElementById('lich_nguoiphutrach').value = ev.nguoiPhuTrach || '';
+  document.getElementById('lich_diadiem').value = ev.diaDiem || '';
+  document.getElementById('lich_trangthai').value = ev.trangThai || 'Chưa diễn ra';
+  document.getElementById('lich_noidung').value = ev.noiDung || '';
+  document.getElementById('lichFormTitle').textContent = 'Sửa công việc';
+  document.getElementById('lichSubmitBtn').textContent = 'Lưu';
+  document.getElementById('lichCancelBtn').style.display = 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelLichEdit(){
+  resetLichForm();
+}
+
+function removeLichEvent(row){
+  if (!confirm('Xóa công việc này?')) return;
+  google.script.run.withSuccessHandler(function(){
+    showMsg('Đã xóa', true);
+    if (lichEditRow === row) resetLichForm();
+    loadLichTuan();
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi: ' + err.message, false);
+  }).deleteLichEvent(row);
+}
+
+document.getElementById('lichForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const nguoiPT = document.getElementById('lich_nguoiphutrach');
+  if (!validateNddInput(nguoiPT, 'Người phụ trách')) return;
+  const data = {
+    ngay: document.getElementById('lich_ngay').value,
+    gioBatDau: document.getElementById('lich_giobatdau').value,
+    gioKetThuc: document.getElementById('lich_gioketthuc').value,
+    noiDung: document.getElementById('lich_noidung').value,
+    nguoiPhuTrach: nguoiPT.value.trim(),
+    khuVuc: document.getElementById('lich_khuvuc').value,
+    diaDiem: document.getElementById('lich_diadiem').value,
+    trangThai: document.getElementById('lich_trangthai').value
+  };
+  if (!data.ngay) { showMsg('Vui lòng chọn Ngày', false); return; }
+  if (!data.noiDung.trim()) { showMsg('Vui lòng nhập Nội dung công việc', false); return; }
+  const isEdit = lichEditRow !== null;
+  const runner = google.script.run.withSuccessHandler(function(){
+    showMsg(isEdit ? 'Đã lưu' : 'Đã thêm', true);
+    resetLichForm();
+    loadLichTuan();
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi: ' + err.message, false);
+  });
+  if (isEdit) runner.updateLichEvent(lichEditRow, data);
+  else runner.addLichEvent(data);
+});
+
 /** ---------- Khởi động ---------- */
 function loadAll(){
   loadDropdowns();
@@ -1528,6 +1779,7 @@ function loadAll(){
   if (!document.getElementById('kvMonth').value) document.getElementById('kvMonth').value = currentMonthKey();
   loadStatsPanel();
   loadGoalPanel();
+  loadLichTuan();
   setTimeout(function(){
     const el = document.getElementById('loadingOverlay');
     if (el) el.style.display = 'none';
