@@ -1242,40 +1242,27 @@ function refreshTPFromTable_(){
 function loadKVOverview(){
   if (!selectedKV) return;
   const monthKey = kvMonthKey();
-  const prevKey = prevMonthKeyOf_(monthKey);
   document.getElementById('trudo_kvName').textContent = selectedKV;
-  window._trudoCurActual = null;
-  window._trudoPrevActual = null;
 
+  // Chỉ 1 lượt gọi tới Apps Script (trước đây phải gọi 2 lượt riêng: dữ liệu
+  // tháng đang xem + dữ liệu tháng trước) — getKhuVucOverview giờ trả về cả
+  // 2 trong 1 lần, giảm 1 chuyến đi-về qua mạng mỗi khi đổi Khu vực/tháng.
   google.script.run.withSuccessHandler(function(o){
     document.getElementById('kv_total').textContent = o.tongHocVien;
     document.getElementById('kvGoalBody').innerHTML = o.goalSummary ? renderGoalRows(o.goalSummary) : '';
     document.getElementById('kvBuoiBody').innerHTML = o.breakdown.length ? o.breakdown.map(function(r){
       return '<tr><td>' + esc(r.tienDo) + '</td><td class="stats-num">' + esc(r.count) + '</td></tr>';
     }).join('') : '<tr><td colspan="2" style="color:#94a3b8;">Chưa có dữ liệu trong tháng này</td></tr>';
-    window._trudoCurActual = o.goalSummary ? o.goalSummary.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
-    renderTrudoChartIfReady_();
+    const curActual = o.goalSummary ? o.goalSummary.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
+    const prevActual = o.prevGoalSummary ? o.prevGoalSummary.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
+    renderBarChart_('trudoChart', ['Tháng trước', 'Tháng này'], [
+      { name: 'Đơn thuần', color: '#2563eb', values: [prevActual.donThuan, curActual.donThuan] },
+      { name: 'Hữu hiệu', color: '#f59e0b', values: [prevActual.huuHieu, curActual.huuHieu] },
+      { name: 'BT', color: '#16a34a', values: [prevActual.bt, curActual.bt] }
+    ]);
   }).withFailureHandler(function(err){
     showMsg('Lỗi tải hiện trạng khu vực: ' + err.message, false);
   }).getKhuVucOverview(monthKey, selectedKV);
-
-  google.script.run.withSuccessHandler(function(list){
-    const row = list.find(function(s){ return s.khuVuc === selectedKV; });
-    window._trudoPrevActual = row ? row.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
-    renderTrudoChartIfReady_();
-  }).withFailureHandler(function(){
-    window._trudoPrevActual = { donThuan: 0, huuHieu: 0, bt: 0 };
-    renderTrudoChartIfReady_();
-  }).getMonthlySummaryByKV(prevKey);
-}
-
-function renderTrudoChartIfReady_(){
-  if (!window._trudoCurActual || !window._trudoPrevActual) return;
-  renderBarChart_('trudoChart', ['Tháng trước', 'Tháng này'], [
-    { name: 'Đơn thuần', color: '#2563eb', values: [window._trudoPrevActual.donThuan, window._trudoCurActual.donThuan] },
-    { name: 'Hữu hiệu', color: '#f59e0b', values: [window._trudoPrevActual.huuHieu, window._trudoCurActual.huuHieu] },
-    { name: 'BT', color: '#16a34a', values: [window._trudoPrevActual.bt, window._trudoCurActual.bt] }
-  ]);
 }
 
 /** ---------- GIÁO DỤC — 1 Khu vực đang chọn, % theo tuần từng thành viên ---------- */
