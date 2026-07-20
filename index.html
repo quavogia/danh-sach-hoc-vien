@@ -436,10 +436,11 @@ const API_READ_FNS = new Set(['getDropdownOptions', 'getStudents', 'getStats', '
 
 // Cache tạm ở trình duyệt cho các hàm ĐỌC (API_READ_FNS) — key là "tênHàm::tham số",
 // giá trị sống trong CACHE_TTL_MS. Mục đích: khi chuyển qua lại Khu vực/tab đã xem
-// trong ít phút gần đây, trả ngay dữ liệu cũ (0ms, không phải chờ mạng/Apps Script)
-// rồi ÂM THẦM gọi lại API để lấy bản mới nhất — nếu có gì đổi, UI tự vẽ lại lần 2
-// mà không giật hình vì HTML y hệt trong đa số trường hợp. Mọi thao tác GHI (thêm/
-// sửa/xóa) sẽ xóa sạch cache để đảm bảo lần đọc kế tiếp luôn lấy dữ liệu mới nhất.
+// trong vòng CACHE_TTL_MS gần đây, trả NGUYÊN VẸN dữ liệu cũ (0ms, không phải chờ
+// mạng/Apps Script) — KHÔNG gọi lại API ngầm trong lúc đó, để số liệu/biểu đồ không
+// tự đổi giữa chừng gây cảm giác "nhảy". Hết CACHE_TTL_MS thì lần xem kế tiếp mới
+// gọi lại API. Mọi thao tác GHI (thêm/sửa/xóa) sẽ xóa sạch cache để đảm bảo lần đọc
+// kế tiếp luôn lấy dữ liệu mới nhất.
 const _apiCache = {};
 const CACHE_TTL_MS = 60000;
 
@@ -483,8 +484,7 @@ function createRunner(){
           const cached = _apiCache[cacheKey];
           if (cached && (Date.now() - cached.time) < CACHE_TTL_MS) {
             if (onSuccess) onSuccess(cached.data);
-            doFetch(); // vẫn âm thầm làm mới cache cho lần sau
-            return proxy;
+            return proxy; // dùng đúng dữ liệu đã cache, không gọi lại API ngầm
           }
         }
         doFetch();
