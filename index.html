@@ -1703,6 +1703,11 @@ function getEduInputValue_(idx, field, week){
 // Mỗi thành viên/tuần chỉ có 1 dòng dữ liệu (lưu chung cả EDU LMS lẫn Trực
 // tuyến 127), nhưng bảng hiển thị 2 hàng riêng (2 chỉ số) — nên khi sửa 1 ô
 // phải gửi kèm giá trị hiện tại của ô kia (cùng thành viên, cùng tuần).
+// Cập nhật (LƯU LẠC QUAN): cập nhật biểu đồ/bảng tỷ lệ NGAY khi rời ô — không
+// chờ phản hồi mạng — để cảm giác tức thì (Apps Script luôn mất 1-3 giây mỗi
+// lượt gọi, không rút ngắn được, nên né bằng cách không bắt người dùng NHÌN
+// THẤY khoảng chờ đó). Lưu thật xuống Google Sheet chạy NGẦM phía sau; nếu
+// lỗi (hiếm) sẽ báo + tự tải lại đúng dữ liệu từ server.
 function saveEduCell(inputEl){
   const monthKey = kvMonthKey();
   const idx = Number(inputEl.dataset.idx);
@@ -1715,17 +1720,18 @@ function saveEduCell(inputEl){
   const otherVal = getEduInputValue_(idx, otherField, week);
   const eduLmsVal = field === 'eduLms' ? val : otherVal;
   const truc127Val = field === 'truc127' ? val : otherVal;
-  inputEl.disabled = true;
+
+  recomputeEduMetricTotal_(idx, field);
+  renderEduChart_(eduCurrentList);
+  renderEduRateTable_(eduCurrentList);
+  inputEl.classList.add('saved');
+  setTimeout(function(){ inputEl.classList.remove('saved'); }, 700);
+
   google.script.run.withSuccessHandler(function(){
-    inputEl.disabled = false;
-    inputEl.classList.add('saved');
-    setTimeout(function(){ inputEl.classList.remove('saved'); }, 700);
-    recomputeEduMetricTotal_(idx, field);
-    renderEduChart_(eduCurrentList);
-    renderEduRateTable_(eduCurrentList);
+    // Đã đồng bộ xong với server, giao diện đã đúng từ trước — không cần làm gì thêm.
   }).withFailureHandler(function(err){
-    inputEl.disabled = false;
-    showMsg('Lỗi lưu Giáo dục: ' + err.message, false);
+    showMsg('Lỗi lưu Giáo dục: ' + err.message + ' — đang tải lại để đồng bộ.', false);
+    loadEduPanel();
   }).saveGiaoDucWeek(monthKey, selectedKV, member.ten, week, eduLmsVal, truc127Val);
 }
 
@@ -1746,30 +1752,64 @@ function recomputeEduMetricTotal_(idx, field){
   }
 }
 
+// Thêm (LƯU LẠC QUAN): thêm vào danh sách trên trình duyệt NGAY, hiện lên
+// biểu đồ/bảng tức thì — không đợi Apps Script trả lời (luôn mất 1-3 giây).
+// Gửi lệnh thêm thật xuống server chạy NGẦM; nếu lỗi (hiếm, VD trùng tên)
+// mới gỡ lại thành viên vừa thêm + báo lỗi.
 function addEduMemberQuick(){
   if (!selectedKV) { showMsg('Vui lòng chọn Khu vực', false); return; }
   const input = document.getElementById('edu_newTen');
   const ten = input.value.trim();
   if (!ten) { showMsg('Vui lòng nhập Tên thành viên', false); return; }
+  if (eduCurrentList.some(function(m){ return m.ten === ten; })) {
+    showMsg('Thành viên "' + ten + '" đã có trong Khu vực này.', false);
+    return;
+  }
+  const newMember = {
+    ten: ten,
+    eduLms: { prevMonthTotal: 0, weeks: [0, 0, 0, 0, 0], total: 0 },
+    truc127: { prevMonthTotal: 0, weeks: [0, 0, 0, 0, 0], total: 0 }
+  };
+  eduCurrentList.push(newMember);
+  input.value = '';
+  renderEduChart_(eduCurrentList);
+  renderEduRateTable_(eduCurrentList);
+  renderEduEditTable_(eduCurrentList);
+  showMsg('Đã thêm thành viên', true);
+
   google.script.run.withSuccessHandler(function(){
-    showMsg('Đã thêm thành viên', true);
-    input.value = '';
-    loadEduPanel();
+    // Đã lưu thật xong ở server — giao diện đã đúng từ trước rồi.
   }).withFailureHandler(function(err){
+    const i = eduCurrentList.indexOf(newMember);
+    if (i > -1) eduCurrentList.splice(i, 1);
+    renderEduChart_(eduCurrentList);
+    renderEduRateTable_(eduCurrentList);
+    renderEduEditTable_(eduCurrentList);
     showMsg('Lỗi: ' + err.message, false);
   }).addGiaoDucMember({ khuVuc: selectedKV, ten: ten });
 }
 
+// Xóa (LƯU LẠC QUAN): xóa khỏi danh sách trên trình duyệt NGAY sau khi xác
+// nhận, không đợi server. Gửi lệnh xóa thật chạy NGẦM; nếu lỗi thì báo + tự
+// tải lại toàn bộ để đồng bộ đúng với dữ liệu thật trên Sheet.
 function removeEduMember(idx){
   const member = eduCurrentList[idx];
   if (!member) return;
   if (!confirm('Xóa thành viên "' + member.ten + '" khỏi khu vực (xóa toàn bộ lịch sử)?')) return;
+  const khuVuc = selectedKV;
+
+  eduCurrentList.splice(idx, 1);
+  renderEduChart_(eduCurrentList);
+  renderEduRateTable_(eduCurrentList);
+  renderEduEditTable_(eduCurrentList);
+  showMsg('Đã xóa', true);
+
   google.script.run.withSuccessHandler(function(){
-    showMsg('Đã xóa', true);
-    loadEduPanel();
+    // Đã xóa thật xong ở server.
   }).withFailureHandler(function(err){
-    showMsg('Lỗi: ' + err.message, false);
-  }).deleteGiaoDucMember(selectedKV, member.ten);
+    showMsg('Lỗi xóa: ' + err.message + ' — đang tải lại để đồng bộ.', false);
+    loadEduPanel();
+  }).deleteGiaoDucMember(khuVuc, member.ten);
 }
 
 /** =========================================================
