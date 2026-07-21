@@ -705,9 +705,19 @@ function smoothPathD_(pts){
     const p2 = pts[i + 1];
     const p3 = pts[i + 2] || p2;
     const c1x = p1.x + (p2.x - p0.x) / 6;
-    const c1y = p1.y + (p2.y - p0.y) / 6;
+    let c1y = p1.y + (p2.y - p0.y) / 6;
     const c2x = p2.x - (p3.x - p1.x) / 6;
-    const c2y = p2.y - (p3.y - p1.y) / 6;
+    let c2y = p2.y - (p3.y - p1.y) / 6;
+    // Ghim (clamp) 2 điểm điều khiển trong khoảng [P1, P2] của CHÍNH đoạn này —
+    // đường Bezier bậc 3 luôn nằm trong "vỏ lồi" (convex hull) của 4 điểm điều
+    // khiển, nên khi c1y/c2y không vượt ra ngoài [min(P1,P2), max(P1,P2)], đoạn
+    // cong chắc chắn không bị "vọt lố" xuống dưới đường 0 hay vượt lên trên đỉnh
+    // — lỗi hay gặp khi 1 điểm là đỉnh nhọn (ví dụ 0 → 5 → 0) khiến tiếp tuyến
+    // Catmull-Rom tính ra ở điểm sau đỉnh bị âm, kéo đường cong lụn xuống dưới 0.
+    const segMin = Math.min(p1.y, p2.y);
+    const segMax = Math.max(p1.y, p2.y);
+    c1y = Math.min(segMax, Math.max(segMin, c1y));
+    c2y = Math.min(segMax, Math.max(segMin, c2y));
     d.push('C' + c1x.toFixed(2) + ',' + c1y.toFixed(2) + ' ' + c2x.toFixed(2) + ',' + c2y.toFixed(2) + ' ' + p2.x + ',' + p2.y);
   }
   return d.join(' ');
