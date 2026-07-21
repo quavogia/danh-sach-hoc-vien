@@ -112,8 +112,10 @@
   .chart-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#fff;border-width:2.75px;border-style:solid;transform:translate(-50%,-50%);pointer-events:none;z-index:3;box-shadow:0 1px 3px rgba(15,23,42,.25);}
   .chart-point-val{position:absolute;transform:translate(-50%,-100%);font-size:13px;font-weight:700;white-space:nowrap;pointer-events:none;z-index:4;}
   .chart-split{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .chart-split-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
   .chart-split-title{font-size:14px;font-weight:700;margin-bottom:8px;}
   @media (max-width: 720px){ .chart-split{grid-template-columns:1fr;} }
+  @media (max-width: 1000px){ .chart-split-3{grid-template-columns:1fr;} }
 
   /* ---------- Lịch làm việc tuần (bảng lịch Thứ 2 - Chủ nhật) ---------- */
   .lich-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -417,8 +419,27 @@
       <!-- ---- Sub-tab: Trudo (Đơn thuần / học viên đang nghe) ---- -->
       <div id="kvsub-trudo" class="kv-subpanel">
         <div class="card">
-          <h3 style="margin:0 0 10px">Trudo — <span id="trudo_kvName">—</span>: Tháng trước so với Tháng này</h3>
-          <div id="trudoChart"></div>
+          <div class="toolbar">
+            <h3 style="margin:0">Trudo — <span id="trudo_kvName">—</span></h3>
+            <div class="kv-pills">
+              <button type="button" class="kv-pill" id="trudoViewWeek" onclick="setTrudoView_('week')">Xem theo tuần</button>
+              <button type="button" class="kv-pill active" id="trudoViewMonth" onclick="setTrudoView_('month')">Xem theo tháng</button>
+            </div>
+          </div>
+          <div class="chart-split-3">
+            <div>
+              <div class="chart-split-title" style="color:#2563eb;">Đơn thuần</div>
+              <div id="trudoChartDT"></div>
+            </div>
+            <div>
+              <div class="chart-split-title" style="color:#f59e0b;">Hữu hiệu</div>
+              <div id="trudoChartHH"></div>
+            </div>
+            <div>
+              <div class="chart-split-title" style="color:#16a34a;">BT</div>
+              <div id="trudoChartBT"></div>
+            </div>
+          </div>
         </div>
 
         <div class="stat-cards">
@@ -534,7 +555,7 @@
  * ========================================================= */
 const API_BASE = 'https://script.google.com/macros/s/AKfycbxDU7SXsnAkdRfAi8EXkknxwKHqCba1G4lIqs5H572do6mbkNkstvJVdDpsiL9LkBg/exec';
 const API_READ_FNS = new Set(['getDropdownOptions', 'getStudents', 'getStats', 'getProgressBreakdown',
-  'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getAllKhuVucOverview', 'getDonThuanLogs', 'getTopNguoiDanDat',
+  'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getAllKhuVucOverview', 'getAllKhuVucWeekly', 'getDonThuanLogs', 'getTopNguoiDanDat',
   'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly', 'getGiaoDucWeeklyAll', 'getLichTuan']);
 
 // Cache tạm ở trình duyệt cho các hàm ĐỌC (API_READ_FNS) — key là "tênHàm::tham số",
@@ -1443,17 +1464,32 @@ function refreshTPFromTable_(){
   renderTPChart_(window._tpCurrentData);
 }
 
-/** ---------- Trudo — 1 Khu vực đang chọn, biểu đồ Tháng trước vs Tháng này ---------- */
+/** ---------- Trudo — 1 Khu vực đang chọn, 3 biểu đồ riêng (Đơn thuần/Hữu
+ *  hiệu/BT), có 2 kiểu xem: Theo tuần (Tuần 1-5 trong tháng đang xem) / Theo
+ *  tháng (Tháng trước so với Tháng này) — giống kiểu xem 2 chế độ của tab TP. */
+let trudoViewMode = 'month'; // 'week' | 'month'
+window._trudoOverviewList = null; // từ getAllKhuVucOverview (dùng cho kiểu "Theo tháng")
+window._trudoWeeklyList = null;   // từ getAllKhuVucWeekly (dùng cho kiểu "Theo tuần")
+
+function setTrudoView_(mode){
+  trudoViewMode = mode;
+  document.getElementById('trudoViewWeek').classList.toggle('active', mode === 'week');
+  document.getElementById('trudoViewMonth').classList.toggle('active', mode === 'month');
+  renderTrudoChart_();
+}
+
 function loadKVOverview(){
   if (!selectedKV) return;
   const monthKey = kvMonthKey();
   document.getElementById('trudo_kvName').textContent = selectedKV;
 
-  // Gọi getAllKhuVucOverview (gộp cả 6 Khu vực trong 1 lần, key cache không phụ
-  // thuộc Khu vực) thay vì getKhuVucOverview(monthKey, khuVuc) riêng từng Khu vực
-  // — nhờ vậy đổi Khu vực chỉ là lọc lại mảng đã có sẵn trên trình duyệt, không
-  // phải chờ gọi mạng/Apps Script mỗi lần bấm nữa (giống cách tab TP đã làm).
+  // Gọi getAllKhuVucOverview + getAllKhuVucWeekly (mỗi hàm gộp cả 6 Khu vực
+  // trong 1 lần, key cache không phụ thuộc Khu vực) thay vì gọi riêng từng Khu
+  // vực — nhờ vậy đổi Khu vực chỉ là lọc lại dữ liệu đã có sẵn trên trình
+  // duyệt, không phải chờ gọi mạng/Apps Script mỗi lần bấm nữa (giống cách tab
+  // TP đã làm).
   google.script.run.withSuccessHandler(function(list){
+    window._trudoOverviewList = list;
     const o = list.find(function(r){ return r.khuVuc === selectedKV; }) ||
       { tongHocVien: 0, goalSummary: null, prevGoalSummary: null, breakdown: [] };
     document.getElementById('kv_total').textContent = o.tongHocVien;
@@ -1461,16 +1497,36 @@ function loadKVOverview(){
     document.getElementById('kvBuoiBody').innerHTML = o.breakdown.length ? o.breakdown.map(function(r){
       return '<tr><td>' + esc(r.tienDo) + '</td><td class="stats-num">' + esc(r.count) + '</td></tr>';
     }).join('') : '<tr><td colspan="2" style="color:#94a3b8;">Chưa có dữ liệu trong tháng này</td></tr>';
-    const curActual = o.goalSummary ? o.goalSummary.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
-    const prevActual = o.prevGoalSummary ? o.prevGoalSummary.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
-    renderBarChart_('trudoChart', ['Tháng trước', 'Tháng này'], [
-      { name: 'Đơn thuần', color: '#2563eb', values: [prevActual.donThuan, curActual.donThuan] },
-      { name: 'Hữu hiệu', color: '#f59e0b', values: [prevActual.huuHieu, curActual.huuHieu] },
-      { name: 'BT', color: '#16a34a', values: [prevActual.bt, curActual.bt] }
-    ]);
+    renderTrudoChart_();
   }).withFailureHandler(function(err){
     showMsg('Lỗi tải hiện trạng khu vực: ' + err.message, false);
   }).getAllKhuVucOverview(monthKey);
+
+  google.script.run.withSuccessHandler(function(list){
+    window._trudoWeeklyList = list;
+    renderTrudoChart_();
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi tải số liệu Trudo theo tuần: ' + err.message, false);
+  }).getAllKhuVucWeekly(monthKey);
+}
+
+function renderTrudoChart_(){
+  if (!selectedKV) return;
+  const overviewList = window._trudoOverviewList || [];
+  const weeklyList = window._trudoWeeklyList || [];
+  const o = overviewList.find(function(r){ return r.khuVuc === selectedKV; }) ||
+    { goalSummary: null, prevGoalSummary: null };
+  const w = weeklyList.find(function(r){ return r.khuVuc === selectedKV; }) ||
+    { donThuan: [0,0,0,0,0], huuHieu: [0,0,0,0,0], bt: [0,0,0,0,0] };
+  const curActual = o.goalSummary ? o.goalSummary.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
+  const prevActual = o.prevGoalSummary ? o.prevGoalSummary.actual : { donThuan: 0, huuHieu: 0, bt: 0 };
+  const categories = trudoViewMode === 'week' ? ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'] : ['Tháng trước', 'Tháng này'];
+  const dtValues = trudoViewMode === 'week' ? w.donThuan : [prevActual.donThuan, curActual.donThuan];
+  const hhValues = trudoViewMode === 'week' ? w.huuHieu : [prevActual.huuHieu, curActual.huuHieu];
+  const btValues = trudoViewMode === 'week' ? w.bt : [prevActual.bt, curActual.bt];
+  renderBarChart_('trudoChartDT', categories, [{ name: 'Đơn thuần', color: '#2563eb', values: dtValues }]);
+  renderBarChart_('trudoChartHH', categories, [{ name: 'Hữu hiệu', color: '#f59e0b', values: hhValues }]);
+  renderBarChart_('trudoChartBT', categories, [{ name: 'BT', color: '#16a34a', values: btValues }]);
 }
 
 /** ---------- GIÁO DỤC — 1 Khu vực đang chọn, % theo tuần từng thành viên ---------- */
