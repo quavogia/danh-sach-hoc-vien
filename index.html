@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Danh sách học viên</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{--primary:#2563eb;--bg:#f8fafc;--border:#e2e8f0;--text:#1e293b;--sidebar:#0f172a;--sidebar-hover:#1e293b;}
   *{box-sizing:border-box;}
@@ -150,6 +151,19 @@
   /* ---------- Loading ---------- */
   #loadingOverlay{position:fixed;inset:0;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-size:14px;color:#64748b;z-index:999;}
 
+  /* ---------- Đăng nhập / Bảo mật ---------- */
+  #authOverlay{position:fixed;inset:0;background:#0f172a;display:none;align-items:center;justify-content:center;z-index:1000;}
+  #authBox{background:#fff;border-radius:14px;padding:36px 32px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35);}
+  #authBox h2{margin:0 0 6px;font-size:19px;color:var(--text);}
+  #authBox p{color:#64748b;font-size:13.5px;line-height:1.6;margin:0 0 20px;}
+  #authGoogleBtn{display:flex;justify-content:center;margin-bottom:14px;}
+  #authStatus{font-size:13px;margin-top:14px;padding:10px 12px;border-radius:8px;display:none;}
+  #authStatus.pending{display:block;background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+  #authStatus.denied{display:block;background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+  #authStatus.error{display:block;background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+  #authRequestBtn{margin-top:10px;background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;}
+  #authUserRow{font-size:12px;color:#94a3b8;margin-top:16px;}
+
   /* ---------- Responsive ---------- */
   @media (max-width: 720px){
     body{flex-direction:column;}
@@ -163,6 +177,16 @@
 <body>
 
   <div id="loadingOverlay">Đang tải dữ liệu…</div>
+
+  <div id="authOverlay">
+    <div id="authBox">
+      <h2>🔒 Đăng nhập bằng Google</h2>
+      <p>Trang này chỉ dành cho người được cấp quyền. Vui lòng đăng nhập bằng Gmail để tiếp tục.</p>
+      <div id="authGoogleBtn"></div>
+      <div id="authStatus"></div>
+      <div id="authUserRow" style="display:none;"></div>
+    </div>
+  </div>
 
   <div id="sidebar">
     <h2>📋 Học viên</h2>
@@ -582,7 +606,7 @@
 const API_BASE = 'https://script.google.com/macros/s/AKfycbxDU7SXsnAkdRfAi8EXkknxwKHqCba1G4lIqs5H572do6mbkNkstvJVdDpsiL9LkBg/exec';
 const API_READ_FNS = new Set(['getDropdownOptions', 'getStudents', 'getStats', 'getProgressBreakdown',
   'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getAllKhuVucOverview', 'getAllKhuVucWeekly', 'getDonThuanLogs', 'getTopNguoiDanDat',
-  'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly', 'getGiaoDucWeeklyAll', 'getLichTuan']);
+  'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly', 'getGiaoDucWeeklyAll', 'getLichTuan', 'checkAccess']);
 
 // Cache tạm ở trình duyệt cho các hàm ĐỌC (API_READ_FNS) — key là "tênHàm::tham số",
 // giá trị sống trong CACHE_TTL_MS. Mục đích: khi chuyển qua lại Khu vực/tab đã xem
@@ -614,11 +638,18 @@ function createRunner(){
         const cacheKey = prop + '::' + JSON.stringify(args);
 
         function doFetch(){
+          const token = window._authToken || '';
           const req = isRead
-            ? fetch(API_BASE + '?fn=' + encodeURIComponent(prop) + '&args=' + encodeURIComponent(JSON.stringify(args)))
-            : fetch(API_BASE, { method: 'POST', body: JSON.stringify({ fn: prop, args: args }) });
+            ? fetch(API_BASE + '?fn=' + encodeURIComponent(prop) + '&args=' + encodeURIComponent(JSON.stringify(args)) + '&token=' + encodeURIComponent(token))
+            : fetch(API_BASE, { method: 'POST', body: JSON.stringify({ fn: prop, args: args, token: token }) });
           req.then(function(r){ return r.json(); })
             .then(function(data){
+              if (data.authError) {
+                // Chưa đăng nhập / hết phiên / chưa được duyệt -> hiện lại màn
+                // hình đăng nhập thay vì báo lỗi khó hiểu.
+                showAuthOverlay_(data.pending ? 'pending' : 'signedout');
+                throw new Error('Cần đăng nhập để tiếp tục');
+              }
               if (data.error) throw new Error(data.error);
               if (isRead) {
                 _apiCache[cacheKey] = { time: Date.now(), data: data.result };
@@ -2163,7 +2194,95 @@ function loadAll(){
     if (el) el.style.display = 'none';
   }, 400);
 }
-loadAll();
+
+/** =========================================================
+ *  ĐĂNG NHẬP GOOGLE — chỉ người được duyệt (tab "Access Control" trong
+ *  Sheet) mới xem/nhập được dữ liệu. Toàn bộ trang bị khóa sau lớp phủ
+ *  #authOverlay cho tới khi checkAccess() xác nhận authorized === true.
+ * ========================================================= */
+// !!! PHẢI khớp CHÍNH XÁC với GOOGLE_CLIENT_ID khai báo trong Code.gs.
+const GOOGLE_CLIENT_ID = 'DIEN_CLIENT_ID_VAO_DAY.apps.googleusercontent.com';
+
+window._authToken = '';
+window._authEmail = '';
+
+function showAuthOverlay_(state, extra){
+  document.getElementById('loadingOverlay').style.display = 'none';
+  const overlay = document.getElementById('authOverlay');
+  overlay.style.display = 'flex';
+  const statusEl = document.getElementById('authStatus');
+  const userRow = document.getElementById('authUserRow');
+  statusEl.className = '';
+  statusEl.innerHTML = '';
+  if (state === 'signedout') {
+    userRow.style.display = 'none';
+  } else if (state === 'pending') {
+    statusEl.className = 'pending';
+    statusEl.textContent = 'Yêu cầu của bạn đang chờ Trưởng phòng duyệt. Vui lòng quay lại sau.';
+    userRow.style.display = 'block';
+    userRow.textContent = window._authEmail;
+  } else if (state === 'denied') {
+    statusEl.className = 'denied';
+    statusEl.innerHTML = 'Email <b>' + (extra || window._authEmail) + '</b> chưa được cấp quyền.';
+    statusEl.innerHTML += '<br><button id="authRequestBtn" type="button" onclick="sendAccessRequest_()">Gửi yêu cầu truy cập</button>';
+    userRow.style.display = 'block';
+    userRow.textContent = window._authEmail;
+  } else if (state === 'error') {
+    statusEl.className = 'error';
+    statusEl.textContent = extra || 'Có lỗi khi đăng nhập, vui lòng thử lại.';
+    userRow.style.display = 'none';
+  }
+}
+
+function hideAuthOverlay_(){
+  document.getElementById('authOverlay').style.display = 'none';
+}
+
+function sendAccessRequest_(){
+  const btn = document.getElementById('authRequestBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Đang gửi...'; }
+  google.script.run.withSuccessHandler(function(res){
+    showAuthOverlay_('pending');
+  }).withFailureHandler(function(err){
+    showAuthOverlay_('error', 'Không gửi được yêu cầu: ' + err.message);
+  }).requestAccess();
+}
+
+function onGoogleSignIn_(response){
+  window._authToken = response.credential;
+  google.script.run.withSuccessHandler(function(res){
+    window._authEmail = res.email;
+    if (res.authorized) {
+      hideAuthOverlay_();
+      document.getElementById('loadingOverlay').style.display = 'flex';
+      loadAll();
+    } else if (res.pending) {
+      showAuthOverlay_('pending');
+    } else {
+      showAuthOverlay_('denied', res.email);
+    }
+  }).withFailureHandler(function(err){
+    showAuthOverlay_('error', err.message);
+  }).checkAccess();
+}
+
+function initGoogleSignIn_(){
+  if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+    // Thư viện Google Identity Services chưa tải xong -> thử lại sau 300ms.
+    setTimeout(initGoogleSignIn_, 300);
+    return;
+  }
+  window.google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: onGoogleSignIn_
+  });
+  window.google.accounts.id.renderButton(
+    document.getElementById('authGoogleBtn'),
+    { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill' }
+  );
+  showAuthOverlay_('signedout');
+}
+initGoogleSignIn_();
 </script>
 </body>
 </html>
