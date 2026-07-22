@@ -156,6 +156,16 @@
   .dt-quyen-btn:hover{background:#f1f5f9;}
   .dt-quyen-btn.done{background:#dcfce7;border-color:#86efac;color:#166534;}
 
+  /* ---------- Lễ hội: bảng 5 bài x 3 lần phát biểu ---------- */
+  .lh-check{width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-weight:700;color:#16a34a;padding:0;}
+  .lh-check:hover{background:#f1f5f9;}
+  .lh-check.done{background:#dcfce7;border-color:#86efac;}
+  .lh-row-done td{background:#f0fdf4;}
+  .lehoi-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:16px;}
+  .lehoi-banner .lehoi-banner-title{font-size:16px;font-weight:700;margin:0 0 4px;}
+  .lehoi-banner .lehoi-banner-sub{font-size:12px;opacity:.9;margin:0;}
+  .lehoi-banner button{background:#fff;color:#4f46e5;border:none;font-weight:700;white-space:nowrap;}
+
   /* ---------- Loading ---------- */
   #loadingOverlay{position:fixed;inset:0;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-size:14px;color:#64748b;z-index:999;}
 
@@ -212,6 +222,14 @@
     <!-- ============ TỔNG QUAN ============ -->
     <div id="panel-stats" class="panel active">
       <h1>Tổng quan</h1>
+
+      <div class="lehoi-banner" id="lehoiBanner" style="display:none;">
+        <div>
+          <p class="lehoi-banner-title" id="lehoiBannerTitle">🎉 Lễ hội</p>
+          <p class="lehoi-banner-sub" id="lehoiBannerSub"></p>
+        </div>
+        <button type="button" onclick="goToLeHoi_()">Vào nhập liệu →</button>
+      </div>
 
       <div class="card">
         <h3>Mục tiêu tổng (tháng <span id="ov_monthLabel"></span>) — cộng dồn tất cả Khu vực</h3>
@@ -415,6 +433,7 @@
           <button type="button" class="kv-pill" data-kvsub="trudo" onclick="selectKVSubTab('trudo')">Trudo</button>
           <button type="button" class="kv-pill" data-kvsub="edu" onclick="selectKVSubTab('edu')">Giáo dục</button>
           <button type="button" class="kv-pill" data-kvsub="daotao" onclick="selectKVSubTab('daotao')">Đào tạo</button>
+          <button type="button" class="kv-pill" data-kvsub="lehoi" onclick="selectKVSubTab('lehoi')">🎉 Lễ hội</button>
         </div>
       </div>
 
@@ -597,6 +616,35 @@
           </div>
         </div>
       </div>
+
+      <!-- ---- Sub-tab: Lễ hội — nhập liệu theo từng lễ hội đang diễn ra (vd Lễ hội Lời tháng 8) ---- -->
+      <div id="kvsub-lehoi" class="kv-subpanel">
+        <div class="card" id="lhNoneCard" style="display:none;">
+          <p style="color:#94a3b8;margin:0;">Hiện không có lễ hội nào đang diễn ra.</p>
+        </div>
+        <div id="lhContent" style="display:none;">
+          <div class="card">
+            <h3 style="margin:0 0 6px" id="lh_tenLeHoi">—</h3>
+            <p style="font-size:12px;color:#64748b;margin:0;" id="lh_moTa"></p>
+          </div>
+          <div class="card">
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Thành viên</th><th>Tiến độ</th><th>%</th><th>Thao tác</th></tr></thead>
+                <tbody id="lhTienDoBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card" id="lhGridCard" style="display:none;">
+            <div class="toolbar">
+              <h3 style="margin:0">Đánh dấu số lần phát biểu — <span id="lh_selectedTen"></span></h3>
+              <button type="button" class="secondary" onclick="closeLeHoiGrid_()">Đóng</button>
+            </div>
+            <p style="font-size:12px;color:#64748b;margin:0 0 10px;">Mỗi bài cần phát biểu đủ 3 lần với các thành viên khác mới tính hoàn thành — tích đủ 3 ô cả hàng sẽ chuyển sang màu xanh.</p>
+            <div id="lhLessonGrid" style="overflow-x:auto"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ============ LỊCH LÀM VIỆC ============ -->
@@ -673,7 +721,7 @@ const API_BASE = 'https://script.google.com/macros/s/AKfycbxDU7SXsnAkdRfAi8EXkkn
 const API_READ_FNS = new Set(['getDropdownOptions', 'getStudents', 'getStats', 'getProgressBreakdown',
   'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getAllKhuVucOverview', 'getAllKhuVucWeekly', 'getDonThuanLogs', 'getTopNguoiDanDat',
   'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly', 'getGiaoDucWeeklyAll', 'getLichTuan',
-  'getDaoTaoTienDoAll', 'getDaoTaoViecList', 'checkAccess']);
+  'getDaoTaoTienDoAll', 'getDaoTaoViecList', 'getLeHoiActive', 'getLeHoiTienDoAll', 'checkAccess']);
 
 // Cache tạm ở trình duyệt cho các hàm ĐỌC (API_READ_FNS) — key là "tênHàm::tham số",
 // giá trị sống trong CACHE_TTL_MS. Mục đích: khi chuyển qua lại Khu vực/tab đã xem
@@ -1255,6 +1303,25 @@ function loadOverallGoal(){
 function loadStatsPanel(){
   loadOverallGoal();
   loadTopNguoiDanDat();
+  loadLeHoiBanner_();
+}
+
+// Banner Lễ hội ở Tổng quan — chỉ hiện khi có 1 lễ hội đang trong khoảng
+// ngày diễn ra (lấy tự động từ sheet cấu hình, không hard-code ngày tháng
+// ở đây), không hiện số liệu tiến độ trên banner (theo yêu cầu: đơn giản).
+function loadLeHoiBanner_(){
+  google.script.run.withSuccessHandler(function(lh){
+    const banner = document.getElementById('lehoiBanner');
+    if (!lh) { banner.style.display = 'none'; return; }
+    document.getElementById('lehoiBannerTitle').textContent = '🎉 ' + lh.ten;
+    document.getElementById('lehoiBannerSub').textContent =
+      'Diễn ra ' + lh.ngayBatDau + ' — ' + lh.ngayKetThuc + '. Bấm để nhập tiến độ phát biểu.';
+    banner.style.display = 'flex';
+  }).withFailureHandler(function(err){
+    // Không có lễ hội hoặc lỗi tải -> im lặng ẩn banner, không làm phiền
+    // trang Tổng quan bằng thông báo lỗi cho 1 tính năng phụ.
+    document.getElementById('lehoiBanner').style.display = 'none';
+  }).getLeHoiActive();
 }
 
 function renderTopNguoiDanDat(list){
@@ -1585,6 +1652,14 @@ function loadKVSubTab(){
   else if (kvActiveSubTab === 'trudo') loadKVOverview();
   else if (kvActiveSubTab === 'edu') loadEduPanel();
   else if (kvActiveSubTab === 'daotao') loadDaoTaoPanel();
+  else if (kvActiveSubTab === 'lehoi') loadLeHoiPanel();
+}
+
+// Banner ở Tổng quan bấm vào -> nhảy thẳng tới tab con "Lễ hội" trong "Hiện
+// trạng khu vực" (không cần người dùng tự tìm đường).
+function goToLeHoi_(){
+  showPanel('kv');
+  selectKVSubTab('lehoi');
 }
 document.getElementById('kvMonth').addEventListener('change', loadKVSubTab);
 
@@ -2345,6 +2420,133 @@ document.getElementById('dtViecForm').addEventListener('submit', function(e){
   if (isEdit) runner.updateDaoTaoViec(dtViecEditRow, data);
   else runner.addDaoTaoViec(data);
 });
+
+/** =========================================================
+ *  LỄ HỘI — tab con "Hiện trạng khu vực" > "🎉 Lễ hội". Chỉ hiện nội dung
+ *  khi có 1 lễ hội đang trong khoảng ngày diễn ra (lấy từ getLeHoiActive()).
+ *  Mỗi bài trong danh sách cần phát biểu đủ soLanYeuCau lần (mặc định 3) —
+ *  hiển thị dạng bảng: mỗi HÀNG là 1 bài, mỗi CỘT là 1 lần (Lần 1/2/3).
+ * ========================================================= */
+let lhActive = null;        // cấu hình lễ hội đang diễn ra (null = không có)
+let lhCurrentList = [];     // [{ten, theoBai, soLanDaPhat, tongSoLanYeuCau, phanTram}, ...] của selectedKV
+let lhSelectedIdx = null;   // idx trong lhCurrentList đang mở lưới, null = đang đóng
+
+function loadLeHoiPanel(){
+  google.script.run.withSuccessHandler(function(lh){
+    lhActive = lh;
+    if (!lh) {
+      document.getElementById('lhNoneCard').style.display = 'block';
+      document.getElementById('lhContent').style.display = 'none';
+      return;
+    }
+    document.getElementById('lhNoneCard').style.display = 'none';
+    document.getElementById('lhContent').style.display = 'block';
+    document.getElementById('lh_tenLeHoi').textContent = lh.ten;
+    document.getElementById('lh_moTa').textContent =
+      'Diễn ra ' + lh.ngayBatDau + ' — ' + lh.ngayKetThuc + '. Nội dung: phát biểu ' + lh.danhSachBai.length +
+      ' bài (' + lh.danhSachBai.join(', ') + '), mỗi bài đủ ' + lh.soLanYeuCau + ' lần với các thành viên khác.';
+    if (!selectedKV) return;
+    google.script.run.withSuccessHandler(function(allMap){
+      const list = allMap[selectedKV] || [];
+      lhCurrentList = list;
+      renderLeHoiTable_(list);
+      if (lhSelectedIdx !== null && list[lhSelectedIdx]) {
+        renderLeHoiGrid_(list[lhSelectedIdx]);
+      } else {
+        closeLeHoiGrid_();
+      }
+    }).withFailureHandler(function(err){
+      showMsg('Lỗi tải Lễ hội: ' + err.message, false);
+    }).getLeHoiTienDoAll(lh.ma);
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi tải Lễ hội: ' + err.message, false);
+  }).getLeHoiActive();
+}
+
+function renderLeHoiTable_(list){
+  const body = document.getElementById('lhTienDoBody');
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;">Chưa có thành viên nào trong khu vực này (thêm thành viên ở tab "Giáo dục").</td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(function(m, idx){
+    return '<tr>' +
+      '<td>' + esc(m.ten) + '</td>' +
+      '<td>' + m.soLanDaPhat + '/' + m.tongSoLanYeuCau + '</td>' +
+      '<td>' + m.phanTram + '%</td>' +
+      '<td><button type="button" class="icon-btn" onclick="openLeHoiGrid_(' + idx + ')" title="Đánh dấu số lần phát biểu">📖 Sửa tiến độ</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function openLeHoiGrid_(idx){
+  const m = lhCurrentList[idx];
+  if (!m) return;
+  lhSelectedIdx = idx;
+  document.getElementById('lhGridCard').style.display = 'block';
+  document.getElementById('lh_selectedTen').textContent = m.ten;
+  renderLeHoiGrid_(m);
+  document.getElementById('lhGridCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeLeHoiGrid_(){
+  lhSelectedIdx = null;
+  document.getElementById('lhGridCard').style.display = 'none';
+}
+
+// Bảng: mỗi HÀNG là 1 bài trong danh sách lễ hội, mỗi CỘT là 1 lần phát
+// biểu (Lần 1/Lần 2/Lần 3...). Tích đủ hết các cột của 1 hàng -> hàng đó
+// chuyển màu xanh (đã hoàn thành bài đó).
+function renderLeHoiGrid_(m){
+  if (!lhActive) return;
+  const el = document.getElementById('lhLessonGrid');
+  const soLan = lhActive.soLanYeuCau;
+  let html = '<table class="tp-table"><thead><tr><th>Bài</th>' +
+    Array.from({ length: soLan }, function(_, i){ return '<th>Lần ' + (i + 1) + '</th>'; }).join('') +
+    '</tr></thead><tbody>';
+  lhActive.danhSachBai.forEach(function(ma){
+    const demDaPhat = (m.theoBai && m.theoBai[ma]) || 0;
+    const rowDone = demDaPhat >= soLan;
+    html += '<tr class="' + (rowDone ? 'lh-row-done' : '') + '"><td>' + esc(ma) + '</td>';
+    for (let lan = 1; lan <= soLan; lan++) {
+      const done = lan <= demDaPhat;
+      html += '<td><button type="button" class="lh-check' + (done ? ' done' : '') +
+        '" data-mabai="' + ma + '" data-lan="' + lan + '" onclick="toggleLeHoiLan_(this)">' + (done ? '✓' : '') + '</button></td>';
+    }
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// LƯU LẠC QUAN: đổi trạng thái ô ngay trên trình duyệt, không chờ mạng. Lưu
+// thật chạy ngầm; lỗi thì báo + tải lại toàn bộ tab để đồng bộ. Đơn giản hóa
+// số lần "đã phát" bằng cách đếm số ô đã tích (không giữ đúng thứ tự lần
+// nào-là-lần-nào), vì với người dùng chỉ cần biết "đã phát mấy/3 lần".
+function toggleLeHoiLan_(btn){
+  const m = lhSelectedIdx !== null ? lhCurrentList[lhSelectedIdx] : null;
+  if (!m || !lhActive) return;
+  const ma = btn.dataset.mabai;
+  const lan = Number(btn.dataset.lan);
+  const willBeDone = !btn.classList.contains('done');
+
+  if (!m.theoBai) m.theoBai = {};
+  const demTruoc = m.theoBai[ma] || 0;
+  const demSau = willBeDone ? Math.max(demTruoc, lan) : Math.min(demTruoc, lan - 1);
+  const delta = demSau - demTruoc;
+  m.theoBai[ma] = demSau;
+  m.soLanDaPhat = Math.max(0, m.soLanDaPhat + delta);
+  m.phanTram = m.tongSoLanYeuCau ? Math.round((m.soLanDaPhat / m.tongSoLanYeuCau) * 1000) / 10 : 0;
+
+  renderLeHoiGrid_(m);
+  renderLeHoiTable_(lhCurrentList);
+
+  google.script.run.withSuccessHandler(function(){
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi lưu tiến độ: ' + err.message + ' — đang tải lại để đồng bộ.', false);
+    loadLeHoiPanel();
+  }).toggleLeHoiLan(lhActive.ma, selectedKV, m.ten, ma, lan, willBeDone);
+}
 
 /** =========================================================
  *  LỊCH LÀM VIỆC TUẦN — bảng lịch Thứ 2 - Chủ nhật, cả nhóm cùng xem, mỗi
