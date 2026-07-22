@@ -148,6 +148,11 @@
   .edu-member-head td{background:#f8fafc;font-weight:700;padding-top:10px !important;}
   .edu-member-head .danger{float:right;padding:2px 8px;font-size:11px;}
 
+  /* ---------- Đào tạo: lưới 70 bài (7 quyển x 10 bài) ---------- */
+  .dt-lesson-cell{width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-weight:700;color:#16a34a;padding:0;}
+  .dt-lesson-cell:hover{background:#f1f5f9;}
+  .dt-lesson-cell.done{background:#dcfce7;border-color:#86efac;}
+
   /* ---------- Loading ---------- */
   #loadingOverlay{position:fixed;inset:0;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-size:14px;color:#64748b;z-index:999;}
 
@@ -406,6 +411,7 @@
           <button type="button" class="kv-pill active" data-kvsub="tp" onclick="selectKVSubTab('tp')">TP</button>
           <button type="button" class="kv-pill" data-kvsub="trudo" onclick="selectKVSubTab('trudo')">Trudo</button>
           <button type="button" class="kv-pill" data-kvsub="edu" onclick="selectKVSubTab('edu')">Giáo dục</button>
+          <button type="button" class="kv-pill" data-kvsub="daotao" onclick="selectKVSubTab('daotao')">Đào tạo</button>
         </div>
       </div>
 
@@ -531,6 +537,59 @@
           <div style="overflow-x:auto"><table class="tp-table" id="eduEditTable"></table></div>
         </div>
       </div>
+
+      <!-- ---- Sub-tab: Đào tạo — Giáo trình "Đứng lớp" (70 bài) + Việc giao tuần/tháng ---- -->
+      <div id="kvsub-daotao" class="kv-subpanel">
+        <div class="card">
+          <h3 style="margin:0 0 6px">Giáo trình "Đứng lớp" — <span id="dt_kvName">—</span></h3>
+          <p style="font-size:12px;color:#64748b;margin:0 0 14px;">70 bài chia thành 7 quyển (mỗi quyển 10 bài). Đánh dấu tự do, không cần theo đúng thứ tự. Hoàn thành trọn 70/70 bài mới đủ điều kiện cấp chứng chỉ "Đứng lớp".</p>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Thành viên</th><th>Tiến độ</th><th>%</th><th>Chứng chỉ</th><th>Thao tác</th></tr></thead>
+              <tbody id="dtTienDoBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" id="dtGridCard" style="display:none;">
+          <div class="toolbar">
+            <h3 style="margin:0">Đánh dấu bài học — <span id="dt_selectedTen"></span></h3>
+            <button type="button" class="secondary" onclick="closeDaoTaoGrid_()">Đóng</button>
+          </div>
+          <div id="dtLessonGrid" style="overflow-x:auto"></div>
+        </div>
+
+        <div class="card">
+          <h3 id="dtvFormTitle" style="margin:0 0 14px">Giao việc mới — <span id="dt_kvName2">—</span></h3>
+          <form id="dtViecForm">
+            <input type="hidden" id="dtv_editRow" value="">
+            <div class="grid">
+              <div><label>Thành viên *</label><select id="dtv_ten" required></select></div>
+              <div><label>Ngày giao</label><input type="date" id="dtv_ngaygiao"></div>
+              <div><label>Hạn hoàn thành</label><input type="date" id="dtv_han"></div>
+              <div><label>Trạng thái</label>
+                <select id="dtv_trangthai">
+                  <option>Chưa làm</option>
+                  <option>Đang làm</option>
+                  <option>Hoàn thành</option>
+                  <option>Trễ hạn</option>
+                </select>
+              </div>
+              <div style="grid-column:1/-1"><label>Nội dung công việc *</label><textarea id="dtv_noidung" required></textarea></div>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button type="submit" id="dtvSubmitBtn">Giao việc</button>
+              <button type="button" class="secondary" id="dtvCancelBtn" onclick="cancelDaoTaoViecEdit()" style="display:none;">Hủy sửa</button>
+            </div>
+          </form>
+          <div style="overflow-x:auto;margin-top:16px;">
+            <table>
+              <thead><tr><th>Thành viên</th><th>Nội dung</th><th>Ngày giao</th><th>Hạn</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+              <tbody id="dtViecBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ============ LỊCH LÀM VIỆC ============ -->
@@ -606,7 +665,8 @@
 const API_BASE = 'https://script.google.com/macros/s/AKfycbxDU7SXsnAkdRfAi8EXkknxwKHqCba1G4lIqs5H572do6mbkNkstvJVdDpsiL9LkBg/exec';
 const API_READ_FNS = new Set(['getDropdownOptions', 'getStudents', 'getStats', 'getProgressBreakdown',
   'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getAllKhuVucOverview', 'getAllKhuVucWeekly', 'getDonThuanLogs', 'getTopNguoiDanDat',
-  'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly', 'getGiaoDucWeeklyAll', 'getLichTuan', 'checkAccess']);
+  'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly', 'getGiaoDucWeeklyAll', 'getLichTuan',
+  'getDaoTaoTienDoAll', 'getDaoTaoViecList', 'checkAccess']);
 
 // Cache tạm ở trình duyệt cho các hàm ĐỌC (API_READ_FNS) — key là "tênHàm::tham số",
 // giá trị sống trong CACHE_TTL_MS. Mục đích: khi chuyển qua lại Khu vực/tab đã xem
@@ -1503,6 +1563,7 @@ function loadKVSubTab(){
   if (kvActiveSubTab === 'tp') loadTPPanel();
   else if (kvActiveSubTab === 'trudo') loadKVOverview();
   else if (kvActiveSubTab === 'edu') loadEduPanel();
+  else if (kvActiveSubTab === 'daotao') loadDaoTaoPanel();
 }
 document.getElementById('kvMonth').addEventListener('change', loadKVSubTab);
 
@@ -1948,6 +2009,263 @@ function removeEduMember(idx){
     loadEduPanel();
   }).deleteGiaoDucMember(khuVuc, member.ten);
 }
+
+/** =========================================================
+ *  ĐÀO TẠO — 1 Khu vực đang chọn, gồm 2 phần độc lập:
+ *  (A) Giáo trình "Đứng lớp": 70 bài (7 quyển x 10 bài, mã "Q-B"), đánh dấu
+ *      tự do không cần thứ tự, đủ 70/70 mới được cấp chứng chỉ. Dùng CHUNG
+ *      danh sách thành viên với tab Giáo dục (trả về sẵn trong
+ *      getDaoTaoTienDoAll(), không cần gọi thêm getGiaoDucMembers()).
+ *  (B) Việc giao trong tuần/tháng: Trưởng phòng/NDD tự tạo việc cho từng
+ *      thành viên, y hệt cách CRUD của "Lịch làm việc" (định danh bằng "row").
+ * ========================================================= */
+let dtCurrentList = [];       // [{ten, baiDaHoc, soBai, phanTram, ngayCapChungChi}, ...] của selectedKV
+let dtSelectedIdx = null;     // idx trong dtCurrentList đang mở lưới 70 bài, null = đang đóng
+let dtViecEditRow = null;     // null = đang thêm mới; số = đang sửa dòng đó
+
+function loadDaoTaoPanel(){
+  if (!selectedKV) return;
+  document.getElementById('dt_kvName').textContent = selectedKV;
+  document.getElementById('dt_kvName2').textContent = selectedKV;
+  google.script.run.withSuccessHandler(function(allMap){
+    const list = allMap[selectedKV] || [];
+    dtCurrentList = list;
+    renderDaoTaoTienDoTable_(list);
+    fillDaoTaoViecSelect_(list);
+    if (dtSelectedIdx !== null && list[dtSelectedIdx]) {
+      renderDaoTaoLessonGrid_(list[dtSelectedIdx]);
+    } else {
+      closeDaoTaoGrid_();
+    }
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi tải Đào tạo: ' + err.message, false);
+  }).getDaoTaoTienDoAll();
+
+  loadDaoTaoViecList_();
+}
+
+function daoTaoCertBadge_(m, idx){
+  if (m.ngayCapChungChi) return '<span style="color:#16a34a;font-weight:700;">✓ Đã cấp (' + esc(m.ngayCapChungChi) + ')</span>';
+  if (m.soBai >= 70) return '<button type="button" onclick="capChungChiDaoTao_(' + idx + ')">Cấp chứng chỉ</button>';
+  return '<span style="color:#94a3b8;">Chưa đủ điều kiện</span>';
+}
+
+function renderDaoTaoTienDoTable_(list){
+  const body = document.getElementById('dtTienDoBody');
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">Chưa có thành viên nào trong khu vực này (thêm thành viên ở tab "Giáo dục").</td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(function(m, idx){
+    return '<tr>' +
+      '<td>' + esc(m.ten) + '</td>' +
+      '<td>' + m.soBai + '/70</td>' +
+      '<td>' + m.phanTram + '%</td>' +
+      '<td>' + daoTaoCertBadge_(m, idx) + '</td>' +
+      '<td><button type="button" class="icon-btn" onclick="openDaoTaoGrid_(' + idx + ')" title="Đánh dấu bài học">📖 Sửa tiến độ</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function openDaoTaoGrid_(idx){
+  const m = dtCurrentList[idx];
+  if (!m) return;
+  dtSelectedIdx = idx;
+  document.getElementById('dtGridCard').style.display = 'block';
+  document.getElementById('dt_selectedTen').textContent = m.ten;
+  renderDaoTaoLessonGrid_(m);
+  document.getElementById('dtGridCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeDaoTaoGrid_(){
+  dtSelectedIdx = null;
+  document.getElementById('dtGridCard').style.display = 'none';
+}
+
+function renderDaoTaoLessonGrid_(m){
+  const el = document.getElementById('dtLessonGrid');
+  const doneSet = {};
+  (m.baiDaHoc || []).forEach(function(code){ doneSet[code] = true; });
+  let html = '<table class="tp-table"><thead><tr><th></th>' +
+    Array.from({ length: 10 }, function(_, b){ return '<th>Bài ' + (b + 1) + '</th>'; }).join('') +
+    '</tr></thead><tbody>';
+  for (let q = 1; q <= 7; q++) {
+    html += '<tr><td>Quyển ' + q + '</td>';
+    for (let b = 1; b <= 10; b++) {
+      const code = q + '-' + b;
+      const done = !!doneSet[code];
+      html += '<td><button type="button" class="dt-lesson-cell' + (done ? ' done' : '') + '" data-code="' + code + '" onclick="toggleDaoTaoLesson_(this)">' + (done ? '✓' : '') + '</button></td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// LƯU LẠC QUAN: đổi trạng thái ô + số bài/% ngay trên trình duyệt, không chờ
+// mạng. Lưu thật chạy ngầm; lỗi thì báo + tải lại toàn bộ tab để đồng bộ.
+function toggleDaoTaoLesson_(btn){
+  const m = dtSelectedIdx !== null ? dtCurrentList[dtSelectedIdx] : null;
+  if (!m) return;
+  const code = btn.dataset.code;
+  const willBeDone = !btn.classList.contains('done');
+
+  btn.classList.toggle('done', willBeDone);
+  btn.textContent = willBeDone ? '✓' : '';
+  if (!m.baiDaHoc) m.baiDaHoc = [];
+  const pos = m.baiDaHoc.indexOf(code);
+  if (willBeDone && pos === -1) m.baiDaHoc.push(code);
+  if (!willBeDone && pos !== -1) m.baiDaHoc.splice(pos, 1);
+  m.soBai = m.baiDaHoc.length;
+  m.phanTram = Math.round((m.soBai / 70) * 1000) / 10;
+  renderDaoTaoTienDoTable_(dtCurrentList);
+
+  google.script.run.withSuccessHandler(function(){
+    // Đã đồng bộ xong với server, giao diện đã đúng từ trước.
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi lưu tiến độ: ' + err.message + ' — đang tải lại để đồng bộ.', false);
+    loadDaoTaoPanel();
+  }).toggleDaoTaoBai(selectedKV, m.ten, code, willBeDone);
+}
+
+function capChungChiDaoTao_(idx){
+  const m = dtCurrentList[idx];
+  if (!m) return;
+  if (m.soBai < 70) { showMsg('Chưa đủ 70/70 bài, chưa thể cấp chứng chỉ.', false); return; }
+  if (!confirm('Xác nhận cấp chứng chỉ "Đứng lớp" cho ' + m.ten + '?')) return;
+  google.script.run.withSuccessHandler(function(res){
+    m.ngayCapChungChi = res.ngayCap;
+    renderDaoTaoTienDoTable_(dtCurrentList);
+    showMsg('Đã cấp chứng chỉ cho ' + m.ten, true);
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi cấp chứng chỉ: ' + err.message, false);
+  }).capChungChiDaoTao(selectedKV, m.ten);
+}
+
+/** ---------- Việc giao trong tuần/tháng ---------- */
+function fillDaoTaoViecSelect_(list){
+  fillSelect(document.getElementById('dtv_ten'), list.map(function(m){ return m.ten; }), '-- Chọn thành viên --', true);
+}
+
+function loadDaoTaoViecList_(){
+  google.script.run.withSuccessHandler(function(list){
+    window._dtViecList = list;
+    renderDaoTaoViecTable_(list);
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi tải Việc giao: ' + err.message, false);
+  }).getDaoTaoViecList(selectedKV);
+}
+
+function daoTaoViecTrangThaiColor_(t){
+  if (t === 'Hoàn thành') return '#166534';
+  if (t === 'Trễ hạn') return '#991b1b';
+  if (t === 'Đang làm') return '#1e40af';
+  return '#64748b';
+}
+
+function renderDaoTaoViecTable_(list){
+  const body = document.getElementById('dtViecBody');
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="6" style="color:#94a3b8;">Chưa giao việc nào cho Khu vực này.</td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(function(v){
+    return '<tr>' +
+      '<td>' + esc(v.ten) + '</td>' +
+      '<td>' + esc(v.noiDung) + '</td>' +
+      '<td>' + esc(v.ngayGiao) + '</td>' +
+      '<td>' + esc(v.hanHoanThanh) + '</td>' +
+      '<td style="color:' + daoTaoViecTrangThaiColor_(v.trangThai) + ';font-weight:600;">' + esc(v.trangThai) + '</td>' +
+      '<td class="actions"><button type="button" class="edit" onclick="editDaoTaoViec(' + v.row + ')">Sửa</button>' +
+      '<button type="button" class="danger" onclick="removeDaoTaoViec(' + v.row + ')">Xóa</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function resetDaoTaoViecForm(){
+  dtViecEditRow = null;
+  document.getElementById('dtViecForm').reset();
+  document.getElementById('dtv_editRow').value = '';
+  document.getElementById('dtvFormTitle').innerHTML = 'Giao việc mới — <span id="dt_kvName2">' + esc(selectedKV || '') + '</span>';
+  document.getElementById('dtvSubmitBtn').textContent = 'Giao việc';
+  document.getElementById('dtvCancelBtn').style.display = 'none';
+}
+
+function editDaoTaoViec(row){
+  const v = (window._dtViecList || []).find(function(x){ return x.row === row; });
+  if (!v) return;
+  dtViecEditRow = row;
+  document.getElementById('dtv_ten').value = v.ten || '';
+  document.getElementById('dtv_ngaygiao').value = v.ngayGiao || '';
+  document.getElementById('dtv_han').value = v.hanHoanThanh || '';
+  document.getElementById('dtv_trangthai').value = v.trangThai || 'Chưa làm';
+  document.getElementById('dtv_noidung').value = v.noiDung || '';
+  document.getElementById('dtvFormTitle').innerHTML = 'Sửa việc đã giao — <span id="dt_kvName2">' + esc(selectedKV || '') + '</span>';
+  document.getElementById('dtvSubmitBtn').textContent = 'Lưu';
+  document.getElementById('dtvCancelBtn').style.display = 'inline-block';
+  window.scrollTo({ top: document.getElementById('dtViecForm').offsetTop - 20, behavior: 'smooth' });
+}
+
+function cancelDaoTaoViecEdit(){
+  resetDaoTaoViecForm();
+}
+
+function removeDaoTaoViec(row){
+  if (!confirm('Xóa việc đã giao này?')) return;
+  const list = (window._dtViecList || []).slice();
+  const idx = list.findIndex(function(v){ return v.row === row; });
+  if (idx > -1) list.splice(idx, 1);
+  renderDaoTaoViecTable_(list);
+  window._dtViecList = list;
+  if (dtViecEditRow === row) resetDaoTaoViecForm();
+  showMsg('Đã xóa', true);
+  google.script.run.withSuccessHandler(function(){
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi xóa: ' + err.message + ' — đang tải lại để đồng bộ.', false);
+    loadDaoTaoViecList_();
+  }).deleteDaoTaoViec(row);
+}
+
+document.getElementById('dtViecForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  if (!selectedKV) { showMsg('Vui lòng chọn Khu vực', false); return; }
+  const ten = document.getElementById('dtv_ten').value;
+  const noiDung = document.getElementById('dtv_noidung').value.trim();
+  if (!ten) { showMsg('Vui lòng chọn Thành viên', false); return; }
+  if (!noiDung) { showMsg('Vui lòng nhập Nội dung công việc', false); return; }
+  const data = {
+    khuVuc: selectedKV,
+    ten: ten,
+    noiDung: noiDung,
+    ngayGiao: document.getElementById('dtv_ngaygiao').value,
+    hanHoanThanh: document.getElementById('dtv_han').value,
+    trangThai: document.getElementById('dtv_trangthai').value
+  };
+  const isEdit = dtViecEditRow !== null;
+
+  // LƯU LẠC QUAN: hiện việc mới/đã sửa lên bảng NGAY, không chờ mạng.
+  const list = (window._dtViecList || []).slice();
+  const optimisticV = Object.assign({ row: isEdit ? dtViecEditRow : -Date.now() }, data);
+  if (isEdit) {
+    const idx = list.findIndex(function(v){ return v.row === dtViecEditRow; });
+    if (idx > -1) list[idx] = optimisticV; else list.push(optimisticV);
+  } else {
+    list.push(optimisticV);
+  }
+  window._dtViecList = list;
+  renderDaoTaoViecTable_(list);
+  resetDaoTaoViecForm();
+  showMsg(isEdit ? 'Đã lưu' : 'Đã giao việc', true);
+
+  const runner = google.script.run.withSuccessHandler(function(){
+    loadDaoTaoViecList_(); // đồng bộ row thật chạy ngầm
+  }).withFailureHandler(function(err){
+    showMsg('Lỗi: ' + err.message + ' — đang tải lại để đồng bộ.', false);
+    loadDaoTaoViecList_();
+  });
+  if (isEdit) runner.updateDaoTaoViec(dtViecEditRow, data);
+  else runner.addDaoTaoViec(data);
+});
 
 /** =========================================================
  *  LỊCH LÀM VIỆC TUẦN — bảng lịch Thứ 2 - Chủ nhật, cả nhóm cùng xem, mỗi
