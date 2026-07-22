@@ -541,7 +541,7 @@
       <!-- ---- Sub-tab: Đào tạo — Phát biểu giáo trình ELOHIM ACADEMY (70 bài) + Việc giao tuần/tháng ---- -->
       <div id="kvsub-daotao" class="kv-subpanel">
         <div class="card">
-          <h3 style="margin:0 0 6px">Phát biểu giáo trình ELOHIM ACADEMY — <span id="dt_kvName">—</span></h3>
+          <h3 style="margin:0 0 6px">Phát biểu giáo trình ELOHIM ACADEMY<span id="dt_kvName" style="display:none"></span></h3>
           <p style="font-size:12px;color:#64748b;margin:0 0 14px;">70 bài chia thành 7 quyển (mỗi quyển 10 bài). Đánh dấu tự do, không cần theo đúng thứ tự. Hoàn thành trọn 70/70 bài mới đủ điều kiện cấp chứng chỉ ELOHIM ACADEMY.</p>
           <div style="overflow-x:auto">
             <table>
@@ -560,7 +560,7 @@
         </div>
 
         <div class="card">
-          <h3 id="dtvFormTitle" style="margin:0 0 14px">Giao việc mới — <span id="dt_kvName2">—</span></h3>
+          <h3 id="dtvFormTitle" style="margin:0 0 14px">Giao việc mới<span id="dt_kvName2" style="display:none"></span></h3>
           <form id="dtViecForm">
             <input type="hidden" id="dtv_editRow" value="">
             <div class="grid">
@@ -2186,7 +2186,7 @@ function resetDaoTaoViecForm(){
   dtViecEditRow = null;
   document.getElementById('dtViecForm').reset();
   document.getElementById('dtv_editRow').value = '';
-  document.getElementById('dtvFormTitle').innerHTML = 'Giao việc mới — <span id="dt_kvName2">' + esc(selectedKV || '') + '</span>';
+  document.getElementById('dtvFormTitle').innerHTML = 'Giao việc mới<span id="dt_kvName2" style="display:none">' + esc(selectedKV || '') + '</span>';
   document.getElementById('dtvSubmitBtn').textContent = 'Giao việc';
   document.getElementById('dtvCancelBtn').style.display = 'none';
 }
@@ -2200,7 +2200,7 @@ function editDaoTaoViec(row){
   document.getElementById('dtv_han').value = v.hanHoanThanh || '';
   document.getElementById('dtv_trangthai').value = v.trangThai || 'Chưa làm';
   document.getElementById('dtv_noidung').value = v.noiDung || '';
-  document.getElementById('dtvFormTitle').innerHTML = 'Sửa việc đã giao — <span id="dt_kvName2">' + esc(selectedKV || '') + '</span>';
+  document.getElementById('dtvFormTitle').innerHTML = 'Sửa việc đã giao<span id="dt_kvName2" style="display:none">' + esc(selectedKV || '') + '</span>';
   document.getElementById('dtvSubmitBtn').textContent = 'Lưu';
   document.getElementById('dtvCancelBtn').style.display = 'inline-block';
   window.scrollTo({ top: document.getElementById('dtViecForm').offsetTop - 20, behavior: 'smooth' });
