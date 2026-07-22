@@ -281,6 +281,17 @@
         <div id="topNguoiDanDat"></div>
         <p style="font-size:12px;color:#64748b;margin-top:10px;">Xếp hạng theo số học viên "Đang nghe" (Tiến độ B1–BT, không tính Tạm nghỉ) có "Ngày chia sẻ cuối cùng" trong tháng này, nhóm theo "Người dẫn dắt".</p>
       </div>
+
+      <div class="card" id="lehoiXepHangCard" style="display:none;">
+        <h3>🎉 Xếp hạng <span id="lhxh_tenLeHoi">Lễ hội</span></h3>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Hạng</th><th>Tên</th><th>Khu vực</th><th>Tiến độ</th><th>Ngày hoàn thành</th></tr></thead>
+            <tbody id="lhxhBody"></tbody>
+          </table>
+        </div>
+        <p style="font-size:12px;color:#64748b;margin-top:10px;">Ai phát biểu đủ số lần yêu cầu cho tất cả các bài TRƯỚC sẽ xếp hạng cao hơn (theo Ngày hoàn thành); người chưa hoàn thành xếp theo % tiến độ giảm dần.</p>
+      </div>
     </div>
 
     <!-- ============ NHẬP HỌC VIÊN ============ -->
@@ -721,7 +732,7 @@ const API_BASE = 'https://script.google.com/macros/s/AKfycbxDU7SXsnAkdRfAi8EXkkn
 const API_READ_FNS = new Set(['getDropdownOptions', 'getStudents', 'getStats', 'getProgressBreakdown',
   'getMonthlySummaryByKV', 'getMonthlySummaryOverall', 'getKhuVucOverview', 'getAllKhuVucOverview', 'getAllKhuVucWeekly', 'getDonThuanLogs', 'getTopNguoiDanDat',
   'getTPSummary', 'getGiaoDucMembers', 'getGiaoDucWeekly', 'getGiaoDucWeeklyAll', 'getLichTuan',
-  'getDaoTaoTienDoAll', 'getDaoTaoViecList', 'getLeHoiActive', 'getLeHoiTienDoAll', 'checkAccess']);
+  'getDaoTaoTienDoAll', 'getDaoTaoViecList', 'getLeHoiActive', 'getLeHoiTienDoAll', 'getLeHoiBanner', 'getLeHoiXepHang', 'checkAccess']);
 
 // Cache tạm ở trình duyệt cho các hàm ĐỌC (API_READ_FNS) — key là "tênHàm::tham số",
 // giá trị sống trong CACHE_TTL_MS. Mục đích: khi chuyển qua lại Khu vực/tab đã xem
@@ -1306,22 +1317,63 @@ function loadStatsPanel(){
   loadLeHoiBanner_();
 }
 
-// Banner Lễ hội ở Tổng quan — chỉ hiện khi có 1 lễ hội đang trong khoảng
-// ngày diễn ra (lấy tự động từ sheet cấu hình, không hard-code ngày tháng
-// ở đây), không hiện số liệu tiến độ trên banner (theo yêu cầu: đơn giản).
+// Banner Lễ hội ở Tổng quan — hiện cả khi ĐANG diễn ra lẫn SẮP diễn ra (lấy
+// tự động từ sheet cấu hình, không hard-code ngày tháng ở đây), để anh luôn
+// biết trước lịch chứ không phải chờ tới đúng ngày mới thấy.
 function loadLeHoiBanner_(){
   google.script.run.withSuccessHandler(function(lh){
     const banner = document.getElementById('lehoiBanner');
-    if (!lh) { banner.style.display = 'none'; return; }
+    if (!lh) { banner.style.display = 'none'; hideLeHoiXepHang_(); return; }
     document.getElementById('lehoiBannerTitle').textContent = '🎉 ' + lh.ten;
-    document.getElementById('lehoiBannerSub').textContent =
-      'Diễn ra ' + lh.ngayBatDau + ' — ' + lh.ngayKetThuc + '. Bấm để nhập tiến độ phát biểu.';
+    if (lh.trangThai === 'active') {
+      document.getElementById('lehoiBannerSub').textContent =
+        'Đang diễn ra: ' + lh.ngayBatDau + ' — ' + lh.ngayKetThuc + '. Bấm để nhập tiến độ phát biểu.';
+    } else {
+      document.getElementById('lehoiBannerSub').textContent =
+        'Sắp diễn ra: ' + lh.ngayBatDau + ' — ' + lh.ngayKetThuc + '.';
+    }
     banner.style.display = 'flex';
+    loadLeHoiXepHang_(lh);
   }).withFailureHandler(function(err){
     // Không có lễ hội hoặc lỗi tải -> im lặng ẩn banner, không làm phiền
     // trang Tổng quan bằng thông báo lỗi cho 1 tính năng phụ.
     document.getElementById('lehoiBanner').style.display = 'none';
-  }).getLeHoiActive();
+    hideLeHoiXepHang_();
+  }).getLeHoiBanner();
+}
+
+function hideLeHoiXepHang_(){
+  document.getElementById('lehoiXepHangCard').style.display = 'none';
+}
+
+// Bảng xếp hạng Lễ hội ở Tổng quan — toàn bộ (mọi Khu vực), ai hoàn thành đủ
+// trước thì hạng cao hơn; chưa hoàn thành thì xếp theo % tiến độ.
+function loadLeHoiXepHang_(lh){
+  google.script.run.withSuccessHandler(function(list){
+    document.getElementById('lhxh_tenLeHoi').textContent = lh.ten;
+    renderLeHoiXepHang_(list || []);
+    document.getElementById('lehoiXepHangCard').style.display = 'block';
+  }).withFailureHandler(function(err){
+    hideLeHoiXepHang_();
+  }).getLeHoiXepHang(lh.ma);
+}
+
+function renderLeHoiXepHang_(list){
+  const body = document.getElementById('lhxhBody');
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">Chưa có ai bắt đầu phát biểu.</td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(function(m, i){
+    const hangIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+    return '<tr>' +
+      '<td>' + hangIcon + '</td>' +
+      '<td>' + esc(m.ten) + '</td>' +
+      '<td>' + esc(m.khuVuc) + '</td>' +
+      '<td>' + m.soLanDaPhat + '/' + m.tongSoLanYeuCau + ' (' + m.phanTram + '%)</td>' +
+      '<td>' + (m.ngayHoanThanh ? '✅ ' + m.ngayHoanThanh : '—') + '</td>' +
+      '</tr>';
+  }).join('');
 }
 
 function renderTopNguoiDanDat(list){
