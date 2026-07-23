@@ -2495,12 +2495,17 @@ document.getElementById('dtViecForm').addEventListener('submit', function(e){
     trangThai: document.getElementById('dtv_trangthai').value
   };
   const isEdit = dtViecEditRow !== null;
+  // QUAN TRỌNG: lưu lại số dòng TRƯỚC KHI gọi resetDaoTaoViecForm() bên dưới
+  // — hàm đó set dtViecEditRow = null. Cùng lỗi đã tìm thấy và sửa ở form
+  // Lịch làm việc: gọi thẳng updateDaoTaoViec(dtViecEditRow,...) SAU khi reset
+  // sẽ gửi row = null lên server -> lưu thất bại.
+  const savedEditRow = dtViecEditRow;
 
   // LƯU LẠC QUAN: hiện việc mới/đã sửa lên bảng NGAY, không chờ mạng.
   const list = (window._dtViecList || []).slice();
-  const optimisticV = Object.assign({ row: isEdit ? dtViecEditRow : -Date.now() }, data);
+  const optimisticV = Object.assign({ row: isEdit ? savedEditRow : -Date.now() }, data);
   if (isEdit) {
-    const idx = list.findIndex(function(v){ return v.row === dtViecEditRow; });
+    const idx = list.findIndex(function(v){ return v.row === savedEditRow; });
     if (idx > -1) list[idx] = optimisticV; else list.push(optimisticV);
   } else {
     list.push(optimisticV);
@@ -2516,7 +2521,7 @@ document.getElementById('dtViecForm').addEventListener('submit', function(e){
     showMsg('Lỗi: ' + err.message + ' — đang tải lại để đồng bộ.', false);
     loadDaoTaoViecList_();
   });
-  if (isEdit) runner.updateDaoTaoViec(dtViecEditRow, data);
+  if (isEdit) runner.updateDaoTaoViec(savedEditRow, data);
   else runner.addDaoTaoViec(data);
 });
 
@@ -2863,13 +2868,21 @@ document.getElementById('lichForm').addEventListener('submit', function(e){
   if (!data.ngay) { showMsg('Vui lòng chọn Ngày', false); return; }
   if (!data.noiDung.trim()) { showMsg('Vui lòng nhập Nội dung công việc', false); return; }
   const isEdit = lichEditRow !== null;
+  // QUAN TRỌNG: phải lưu lại số dòng đang sửa TRƯỚC KHI gọi resetLichForm()
+  // bên dưới — resetLichForm() set lại lichEditRow = null (để form quay về
+  // trạng thái "Thêm công việc"). Trước đây code gọi thẳng
+  // updateLichEvent(lichEditRow, data) SAU resetLichForm(), nên lúc gửi lên
+  // server, lichEditRow đã bị null hóa mất rồi -> server nhận dòng = null ->
+  // sheet.getRange(null,...) lỗi -> lưu thất bại (đây chính là lỗi "sửa Trạng
+  // thái xong lưu nhưng không hiển thị" mà người dùng báo).
+  const savedEditRow = lichEditRow;
 
   // LƯU LẠC QUAN: hiện công việc mới/đã sửa lên lịch NGAY, không chờ mạng.
   const list = (window._lichCurrentList || []).slice();
-  const optimisticEv = Object.assign({ row: isEdit ? lichEditRow : -Date.now() }, data,
+  const optimisticEv = Object.assign({ row: isEdit ? savedEditRow : -Date.now() }, data,
     { nguoiThamGia: data.nguoiThamGia.join(', ') });
   if (isEdit) {
-    const idx = list.findIndex(function(ev){ return ev.row === lichEditRow; });
+    const idx = list.findIndex(function(ev){ return ev.row === savedEditRow; });
     if (idx > -1) list[idx] = optimisticEv; else list.push(optimisticEv);
   } else {
     list.push(optimisticEv);
@@ -2884,7 +2897,7 @@ document.getElementById('lichForm').addEventListener('submit', function(e){
     showMsg('Lỗi: ' + err.message + ' — đang tải lại để đồng bộ.', false);
     loadLichTuan();
   });
-  if (isEdit) runner.updateLichEvent(lichEditRow, data);
+  if (isEdit) runner.updateLichEvent(savedEditRow, data);
   else runner.addLichEvent(data);
 });
 
