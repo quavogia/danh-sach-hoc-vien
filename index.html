@@ -2904,9 +2904,24 @@ function loadSavedAuthToken_(){
 function clearSavedAuthToken_(){
   try { localStorage.removeItem(AUTH_LS_KEY); } catch(e){}
 }
+function base64UrlDecode_(str){
+  str = str.replace(/-/g,'+').replace(/_/g,'/');
+  while (str.length % 4) str += '=';
+  return atob(str);
+}
+
+// Hỗ trợ CẢ 2 loại token: session token riêng của web (tiền tố "SESS.", hạn
+// 30 ngày, dùng cho việc "ghi nhớ đăng nhập") và token Google ID gốc (chỉ
+// sống 1 giờ, chỉ dùng đúng lúc vừa đăng nhập Google lần đầu).
 function isTokenExpired_(token){
   try {
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    if (token.indexOf('SESS.') === 0) {
+      const payloadB64 = token.slice('SESS.'.length).split('.')[0];
+      const payload = JSON.parse(base64UrlDecode_(payloadB64));
+      if (!payload.exp) return false;
+      return Date.now() > payload.exp;
+    }
+    const payload = JSON.parse(base64UrlDecode_(token.split('.')[1]));
     if (!payload.exp) return false;
     return (Date.now() / 1000) > (payload.exp - 30);
   } catch(e){ return true; }
@@ -2955,10 +2970,14 @@ function sendAccessRequest_(){
 }
 
 function onGoogleSignIn_(response){
+  // Token Google (JWT) chỉ dùng đúng 1 lần để xác thực ban đầu ở checkAccess()
+  // — nó chỉ sống 1 giờ nên KHÔNG lưu lại; nếu được duyệt, checkAccess() sẽ
+  // trả về "sessionToken" riêng của web (hạn 30 ngày) để lưu thay vào đó.
   window._authToken = response.credential;
   google.script.run.withSuccessHandler(function(res){
     window._authEmail = res.email;
     if (res.authorized) {
+      if (res.sessionToken) window._authToken = res.sessionToken;
       saveAuthToken_(window._authToken);
       hideAuthOverlay_();
       document.getElementById('loadingOverlay').style.display = 'flex';
@@ -2985,6 +3004,10 @@ function tryAutoLoginFromStorage_(){
   google.script.run.withSuccessHandler(function(res){
     window._authEmail = res.email;
     if (res.authorized) {
+      // Gia hạn thêm 30 ngày mỗi lần vào lại thành công (sliding window) ->
+      // hễ còn ghé web tối thiểu 1 lần/30 ngày là không bao giờ bị bắt đăng
+      // nhập lại nữa.
+      if (res.sessionToken) { window._authToken = res.sessionToken; saveAuthToken_(res.sessionToken); }
       hideAuthOverlay_();
       loadAll();
     } else {
