@@ -510,8 +510,41 @@ function migrateNddListFromDSHV_() {
 // Hàm "công khai" (không có dấu _ ở cuối tên) để có thể chọn và bấm "Chạy"
 // trực tiếp trong trình chỉnh sửa Apps Script — các hàm tên kết thúc bằng "_"
 // (như migrateNddListFromDSHV_) không hiện trong danh sách hàm để chạy.
-function runMigrateNddListOnce() {
+// ĐÃ VÔ HIỆU HÓA (24/07/2026): hàm "công khai" này từng cho phép chạy
+// migrateNddListFromDSHV_ trực tiếp từ trình chỉnh sửa, nhưng bị bấm NHẦM và
+// làm mất phần lớn danh sách Config!C (xem restoreConfigNddListOnce bên
+// dưới để khôi phục). Đây là migration 1 lần đã dùng xong từ lâu, không nên
+// chạy lại — cố tình đổi tên thêm dấu "_" để KHÔNG hiện trong danh sách hàm
+// "Chạy" nữa, tránh bấm nhầm lần nữa.
+function runMigrateNddListOnce_disabled_() {
   migrateNddListFromDSHV_();
+}
+
+// HÀM CHẠY 1 LẦN — khôi phục lại danh sách Người dẫn dắt (Config!C) sau khi
+// runMigrateNddListOnce (ở trên, hàm cũ) bị bấm nhầm ngày 24/07/2026 làm mất
+// dữ liệu (hàm đó ghi đè Config!C bằng tên lấy từ sheet DS HV, mà DS HV hiện
+// chỉ có vài dòng mẫu nên xóa mất phần lớn danh sách). Danh sách dưới đây là
+// đúng 44 tên đã đọc được TRƯỚC khi bị mất, khôi phục lại y nguyên thứ tự cũ.
+function restoreConfigNddListOnce() {
+  const names = [
+    'W Mỹ Vành', 'V T Phúc Trâm', 'V T Hồng Gấm', 'V Hoàng Long',
+    'T Thị Thanh Nguyên', 'T Thầu Nho', 'T Kim Hồng', 'P Tuyết Mai',
+    'P Thị Thành', 'P Ngọc Đức', 'P Hồng Quân', 'P Đức Hậu', 'P Ánh Tú',
+    'P Anh Thành Đạt', 'Nguyễn Thị Tuyết Sương', 'N X Kiều My', 'N Văn Hùng',
+    'N Thị Ngân', 'N Thị Minh Nguyệt', 'N Thị Hường', 'N Thị Hiệu',
+    'N Thanh Huyền', 'N T Hằng', 'N R Lan Uyên', 'N R Lan Sa Anh',
+    'N Quốc Pháp', 'N Khánh Hoàng', 'M T Minh Ngà', 'L Văn Xuân',
+    'L T Thúy Vân', 'L T Cẩm Tiên', 'L Phương Vy', 'L Nguyễn Mạnh Cường',
+    'L N Sơn', 'L N Bảo Châu', 'L Mạnh Hùng', 'L H Đức', 'H Thanh Trúc',
+    'H Nguyễn Anh Dũng', 'Đ Văn Tươi', 'Đ T Như Quỳnh', 'Đ T Ngọc Uyên',
+    'C Phan Quang Anh', 'B Thanh Phong'
+  ];
+  const configSheet = ensureConfigSheet_();
+  const clearLen = Math.max(configSheet.getMaxRows() - 1, names.length);
+  configSheet.getRange(2, 3, clearLen, 1).clearContent();
+  configSheet.getRange(2, 3, names.length, 1).setValues(names.map(function(n) { return [n]; }));
+  Logger.log('Đã khôi phục ' + names.length + ' tên vào Config!C.');
+  return { success: true, count: names.length };
 }
 
 // Danh sách "Khu vực"/"Tổ" (cột F) PHẢI luôn khớp với chính danh sách hợp lệ
