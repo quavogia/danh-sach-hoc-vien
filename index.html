@@ -257,8 +257,13 @@
             <div class="value" id="ovg_bt">—</div>
             <div class="sub" id="ovg_bt_sub"></div>
           </div>
+          <div class="stat-card">
+            <div class="label">EDU LMS</div>
+            <div class="value" id="ovg_edulms">—</div>
+            <div class="sub" id="ovg_edulms_sub"></div>
+          </div>
         </div>
-        <p style="font-size:12px;color:#64748b;margin-top:10px;">Tự cộng dồn ngay khi các Khu vực nhập mục tiêu (Đơn thuần/Hữu hiệu/BT) ở tab "Nhập mục tiêu". Vào "Hiện trạng khu vực" để xem riêng từng khu vực.</p>
+        <p style="font-size:12px;color:#64748b;margin-top:10px;">Đơn thuần/Hữu hiệu/BT: tự cộng dồn ngay khi các Khu vực nhập mục tiêu ở tab "Hiện trạng khu vực" &gt; "🎯 Mục tiêu". EDU LMS: trung bình % thực tế (cao nhất trong 5 tuần) của toàn bộ thành viên mọi Khu vực — không so mục tiêu vì mục tiêu EDU LMS là mục tiêu cá nhân, tùy chọn.</p>
       </div>
 
       <div class="card">
@@ -1362,6 +1367,13 @@ function renderOverallGoalCards(s){
   fill('donthuan', s.goal.donThuan, s.actual.donThuan, s.percent.donThuan);
   fill('huuhieu', s.goal.huuHieu, s.actual.huuHieu, s.percent.huuHieu);
   fill('bt', s.goal.bt, s.actual.bt, s.percent.bt);
+
+  // EDU LMS: không phải MT/TT/% như 3 thẻ trên (mục tiêu EDU LMS là mục tiêu
+  // CÁ NHÂN, tùy chọn, không phải Khu vực nào cũng có) — hiện TRUNG BÌNH %
+  // thực tế của toàn bộ thành viên thay vì tỷ lệ so mục tiêu.
+  const el = s.eduLms || { avg: null, count: 0 };
+  document.getElementById('ovg_edulms').textContent = (el.avg === null || el.avg === undefined) ? '—' : el.avg + '%';
+  document.getElementById('ovg_edulms_sub').textContent = 'Trung bình thực tế của ' + el.count + ' thành viên (mọi Khu vực)';
 }
 
 function loadOverallGoal(){
