@@ -35,6 +35,7 @@
   button.secondary{background:#64748b;}
   button.danger{background:#dc2626;padding:6px 12px;font-size:13px;}
   button.edit{background:#059669;padding:6px 12px;font-size:13px;margin-right:4px;}
+  button.done{background:#0891b2;padding:6px 12px;font-size:13px;margin-right:4px;}
   button.icon-btn{background:transparent;padding:5px 9px;font-size:16px;border:1px solid var(--border);border-radius:6px;margin-right:4px;}
   button.icon-btn:hover{background:#f1f5f9;}
   table{width:100%;border-collapse:collapse;font-size:14px;}
@@ -2444,7 +2445,9 @@ function renderDaoTaoViecTable_(list){
       '<td>' + esc(v.ngayGiao) + '</td>' +
       '<td>' + esc(v.hanHoanThanh) + '</td>' +
       '<td style="color:' + daoTaoViecTrangThaiColor_(v.trangThai) + ';font-weight:600;">' + esc(v.trangThai) + '</td>' +
-      '<td class="actions"><button type="button" class="edit" onclick="editDaoTaoViec(' + v.row + ')">Sửa</button>' +
+      '<td class="actions">' +
+      (v.trangThai !== 'Hoàn thành' ? '<button type="button" class="done" onclick="markDaoTaoViecDone(' + v.row + ')" title="Đánh dấu Hoàn thành, không cần bấm Sửa">✓ Xong</button>' : '') +
+      '<button type="button" class="edit" onclick="editDaoTaoViec(' + v.row + ')">Sửa</button>' +
       '<button type="button" class="danger" onclick="removeDaoTaoViec(' + v.row + ')">Xóa</button></td>' +
     '</tr>';
   }).join('');
@@ -2492,6 +2495,39 @@ function removeDaoTaoViec(row){
     showMsg('Lỗi xóa: ' + err.message + ' — đang tải lại để đồng bộ.', false);
     loadDaoTaoViecList_();
   }).deleteDaoTaoViec(row);
+}
+
+// Đánh dấu nhanh 1 việc đã giao là "Hoàn thành" ngay từ bảng — không cần bấm
+// Sửa rồi đổi Trạng thái trong form. Giữ nguyên mọi thông tin khác của việc
+// đó (Thành viên/Nội dung/Ngày giao/Hạn), chỉ đổi Trạng thái.
+function markDaoTaoViecDone(row){
+  const list = window._dtViecList || [];
+  const idx = list.findIndex(function(v){ return v.row === row; });
+  if (idx === -1) return;
+  const backup = Object.assign({}, list[idx]);
+  if (backup.trangThai === 'Hoàn thành') return;
+  const data = {
+    khuVuc: selectedKV,
+    ten: backup.ten,
+    noiDung: backup.noiDung,
+    ngayGiao: backup.ngayGiao,
+    hanHoanThanh: backup.hanHoanThanh,
+    trangThai: 'Hoàn thành'
+  };
+
+  // LƯU LẠC QUAN: đổi trạng thái trên bảng ngay, không chờ mạng.
+  list[idx] = Object.assign({}, backup, { trangThai: 'Hoàn thành' });
+  renderDaoTaoViecTable_(list);
+  showMsg('Đã đánh dấu Hoàn thành', true);
+
+  google.script.run.withSuccessHandler(function(){
+    loadDaoTaoViecList_(); // đồng bộ row thật chạy ngầm
+  }).withFailureHandler(function(err){
+    list[idx] = backup;
+    renderDaoTaoViecTable_(list);
+    showMsg('Lỗi: ' + err.message + ' — đang tải lại để đồng bộ.', false);
+    loadDaoTaoViecList_();
+  }).updateDaoTaoViec(row, data);
 }
 
 document.getElementById('dtViecForm').addEventListener('submit', function(e){
